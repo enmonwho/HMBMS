@@ -1,13 +1,295 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hmbs</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Makati Human Milk Bank</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══ -->
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" aria-label="Makati Human Milk Bank home">
+        <img src="images/MHMB Logo.png" alt="Makati Human Milk Bank" class="nav-logo-img">
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#about">About Us</a>
+        <a href="#who">Who We Help</a>
+        <div class="nav-dropdown">
+          <button class="nav-drop-btn" aria-expanded="false" aria-haspopup="true">
+            Programs <span class="caret">▾</span>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <a href="#services" role="menuitem">Milky Way</a>
+            <a href="#services" role="menuitem">Supsup Todo</a>
+            <a href="#services" role="menuitem">Mom's Act</a>
+          </div>
+        </div>
+        <div class="nav-dropdown">
+          <button class="nav-drop-btn" aria-expanded="false" aria-haspopup="true">
+            How to Donate <span class="caret">▾</span>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <a href="DonateForms.html" role="menuitem">Financial Donation</a>
+            <a href="#" role="menuitem">Donate Breast Milk</a>
+            <a href="#" role="menuitem">Volunteer</a>
+          </div>
+        </div>
+      </nav>
+
+      <a href="DonateForms.html" class="btn-nav-donate">Donate</a>
+
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+      <a href="#about">About Us</a>
+      <a href="#who">Who We Help</a>
+      <a href="#services">Programs</a>
+      <a href="#">How to Donate</a>
+      <a href="DonateForms.html" class="mobile-donate-link">Donate Now</a>
+    </div>
+  </header>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero" id="home" aria-label="Hero">
+    <div class="hero-bg">
+      <div class="hero-img hero-img-1" style="background-image:url(images/Milk.png)"></div>
+      <div class="hero-img hero-img-2" style="background-image:url(images/Center.png)"></div>
+      <div class="hero-img hero-img-3" style="background-image:url(images/Patient.png)"></div>
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <h1>Makati Human Milk Bank</h1>
+      <p>The country's first local government-operated human milk bank</p>
+    </div>
+  </section>
+
+  <!-- ══ MAIN CONTENT: Report + Sidebar ══ -->
+  <section class="main-section">
+    <div class="main-layout">
+
+      <!-- LEFT: Donation Report Card -->
+      <div class="report-card" aria-label="Monthly Donation Report">
+        <div class="report-header">
+          <div class="report-line" aria-hidden="true"></div>
+          <p class="report-title">MONTHLY DONATION REPORT</p>
+        </div>
+
+        <div class="report-total">
+          <span class="total-num" id="totalNum">785</span>
+          <span class="total-label">Total Donations</span>
+        </div>
+
+        <div class="report-divider" aria-hidden="true"></div>
+
+        <div class="report-sub-stats">
+          <div class="sub-stat">
+            <span class="sub-num">90+</span>
+            <span class="sub-label">Supsup Todo<br>Donations</span>
+          </div>
+          <div class="sub-sep" aria-hidden="true"></div>
+          <div class="sub-stat">
+            <span class="sub-num">67+</span>
+            <span class="sub-label">Milky Way<br>Donations</span>
+          </div>
+          <div class="sub-sep" aria-hidden="true"></div>
+          <div class="sub-stat">
+            <span class="sub-num">65+</span>
+            <span class="sub-label">Mom's Act<br>Donations</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sidebar -->
+      <aside class="sidebar" aria-label="Contact information">
+
+        <div class="sidebar-card">
+          <div class="sidebar-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Hospital building -->
+              <rect x="8" y="24" width="48" height="36" rx="2" stroke="#1C6FAB" stroke-width="2.5" fill="none"/>
+              <rect x="20" y="36" width="8" height="12" rx="1" stroke="#1C6FAB" stroke-width="2" fill="none"/>
+              <rect x="36" y="36" width="8" height="12" rx="1" stroke="#1C6FAB" stroke-width="2" fill="none"/>
+              <rect x="22" y="8" width="20" height="20" rx="2" stroke="#1C6FAB" stroke-width="2.5" fill="none"/>
+              <line x1="32" y1="13" x2="32" y2="23" stroke="#1C6FAB" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="27" y1="18" x2="37" y2="18" stroke="#1C6FAB" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="8" y1="60" x2="56" y2="60" stroke="#1C6FAB" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="sidebar-name">Ospital ng Makati</h3>
+          <p class="sidebar-address">Sampaquita St, Taguig,<br>1218 Metro Manila</p>
+          <p class="sidebar-hours">8AM to 5PM</p>
+          <a href="https://maps.google.com/?q=Ospital+ng+Makati" target="_blank" rel="noopener" class="btn-map">VIEW LOCATION MAP</a>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Phone with signal waves -->
+              <path d="M20 8 C18 8 16 10 16 12 L16 52 C16 54 18 56 20 56 L44 56 C46 56 48 54 48 52 L48 12 C48 10 46 8 44 8 Z" stroke="#1C6FAB" stroke-width="2.5" fill="none"/>
+              <line x1="24" y1="48" x2="40" y2="48" stroke="#1C6FAB" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Signal arcs -->
+              <path d="M36 28 Q42 22 36 16" stroke="#1C6FAB" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+              <path d="M36 32 Q47 22 36 12" stroke="#1C6FAB" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+              <circle cx="30" cy="28" r="3" fill="#1C6FAB"/>
+            </svg>
+          </div>
+          <h3 class="sidebar-name">Hotline</h3>
+          <p class="sidebar-phone">(02) 8882 6316</p>
+        </div>
+
+      </aside>
+    </div>
+  </section>
+
+  <!-- ══ DONATION SERVICES ══ -->
+  <section class="services" id="services" aria-labelledby="services-heading">
+    <div class="services-inner">
+      <div class="services-header">
+        <h2 id="services-heading">Donation Services</h2>
+        <div class="services-rule" aria-hidden="true"></div>
+      </div>
+
+      <div class="services-grid">
+
+        <div class="service-card" tabindex="0" aria-label="Milky Way — Hospital-Based Collection">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="30" stroke="white" stroke-width="3" fill="none"/>
+              <line x1="40" y1="24" x2="40" y2="56" stroke="white" stroke-width="5" stroke-linecap="round"/>
+              <line x1="24" y1="40" x2="56" y2="40" stroke="white" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>MILKY WAY</h3>
+          <p>Hospital-Based Collection</p>
+        </div>
+
+        <div class="service-card" tabindex="0" aria-label="Supsup Todo — Community-Based Collection">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Two people silhouettes -->
+              <circle cx="28" cy="22" r="9" stroke="white" stroke-width="3" fill="none"/>
+              <path d="M12 55 Q12 40 28 40 Q44 40 44 55" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <circle cx="52" cy="22" r="9" stroke="white" stroke-width="3" fill="none"/>
+              <path d="M36 55 Q36 40 52 40 Q68 40 68 55" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <h3>SUPSUP TODO</h3>
+          <p>Community-Based Collection</p>
+        </div>
+
+        <div class="service-card" tabindex="0" aria-label="Mom's Act — Home-Pickup-Based Collection">
+          <div class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- House outline -->
+              <path d="M12 38 L40 12 L68 38" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <path d="M18 34 L18 66 L62 66 L62 34" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <!-- Heart inside -->
+              <path d="M32 44 Q34 40 40 44 Q46 40 48 44 Q48 50 40 56 Q32 50 32 44Z" stroke="white" stroke-width="2.5" fill="none"/>
+            </svg>
+          </div>
+          <h3>MOM'S ACT</h3>
+          <p>Home-Pickup-Based Collection</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══ QUOTE / CTA BLOCK ══ -->
+  <section class="quote-block">
+    <div class="quote-inner">
+      <div class="quote-bar" aria-hidden="true"></div>
+      <div class="quote-content">
+        <h2>A single donation can help change a life.</h2>
+        <p>Our work is made possible through the compassion of people like you. Your generosity allows us to continue delivering meaningful support to individuals and families in need. Every donation counts and brings hope where it is needed most.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="footer" id="contact">
+    <div class="footer-main">
+
+      <!-- Logo -->
+      <div class="footer-logo-col">
+        <img src="images/MHMB Logo.png" alt="Makati Human Milk Bank" class="footer-logo-img">
+      </div>
+
+      <!-- Contact info -->
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg class="contact-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="white" stroke-width="1.8" fill="none"/>
+            <circle cx="12" cy="9" r="2.5" stroke="white" stroke-width="1.8" fill="none"/>
+          </svg>
+          <div>
+            <p class="contact-name">Ospital ng Makati</p>
+            <p class="contact-detail">Sampaquita St, Taguig,<br>1218 Metro Manila</p>
+          </div>
+        </div>
+        <div class="footer-contact-item">
+          <svg class="contact-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" stroke="white" stroke-width="1.8" fill="none"/>
+            <!-- signal arcs -->
+            <path d="M16 3 Q21 3 21 8" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path d="M16 6 Q18.5 6 18.5 8.5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          </svg>
+          <div>
+            <p class="contact-detail">(02) 8882 6316</p>
+            <p class="contact-detail">0960 446 3974</p>
+          </div>
+        </div>
+        <div class="footer-contact-item">
+          <svg class="contact-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="white" stroke-width="1.8" fill="none"/>
+            <path d="M13 21v-8h3l.5-3H13V8.5C13 7.7 13.4 7 14.5 7H17V4.3S15.9 4 14.7 4C12.1 4 11 5.7 11 7.9V10H8v3h3v8" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <div>
+            <p class="contact-detail">Makati Human Milk Bank</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav links -->
+      <div class="footer-nav-col">
+        <a href="#about" class="footer-nav-main">About Us</a>
+        <a href="#who" class="footer-nav-main">Who We Help</a>
+        <a href="#services" class="footer-nav-main">Programs</a>
+        <div class="footer-nav-sub-group">
+          <a href="#services">Milky Way</a>
+          <a href="#services">Supsup Todo</a>
+          <a href="#services">Mom's Act</a>
+        </div>
+      </div>
+
+      <!-- How to donate links -->
+      <div class="footer-nav-col">
+        <a href="#" class="footer-nav-main">How to Donate</a>
+        <div class="footer-nav-sub-group">
+          <a href="#">Procedure</a>
+          <a href="#">Process</a>
+          <a href="#">Safety</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p>Makati Human Milk Bank. Est. 2013. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
 </html>
