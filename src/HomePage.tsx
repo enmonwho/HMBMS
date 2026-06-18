@@ -138,8 +138,8 @@ export default function HomePage() {
                 How to Donate <span className="caret">▾</span>
               </button>
               <div className="dropdown-menu" role="menu">
-                <a href="/donate" role="menuitem">Financial Donation</a>
-                <a href="#" role="menuitem">Donate Breast Milk</a>
+                <a href="#" role="menuitem">Financial Donation</a>
+                <a href="/donate" role="menuitem">Donate Breast Milk</a>
                 <a href="#" role="menuitem">Volunteer</a>
               </div>
             </div>
