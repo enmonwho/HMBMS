@@ -109,7 +109,7 @@ export default function DonateForm() {
         emergency_contact_number: form.emergencyContact,
       };
 
-      await submitDonorApplication(donorDetails, form.medicalHistory);
+      await submitDonorApplication(donorDetails, form.medicalHistory as unknown as Record<string, unknown>);
       alert('Application submitted successfully!');
       
       // Optionally reset form
