@@ -383,64 +383,136 @@ a { color: inherit; text-decoration: none; }
 .btn-map:hover { background: var(--blue-dark); }
 
 /* ════════════════════
-   DONATION SERVICES
+   DONATION FORM
 ════════════════════ */
-.services {
-  padding: 3.5rem 5rem 4rem;
-  background: var(--white);
-}
-.services-inner { max-width: var(--max); margin: 0 auto; }
-.services-header { margin-bottom: 2rem; }
-.services-header h2 {
+
+.section-title-line {
   font-family: var(--ff);
-  font-size: clamp(1.6rem, 3vw, 2.25rem);
-  font-weight: 900;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: var(--blue);
-  margin-bottom: 0.6rem;
+  border-bottom: 2px solid var(--blue);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
 }
-.services-rule {
-  width: 60%;
-  height: 0.5px;
-  background: var(--blue-navy);
+
+.section-subtitle {
+  font-family: var(--ff);
+  font-size: 0.95rem;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 20px;
 }
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-top: 2rem;
+
+/* Medical & Lifestyle */
+.medical-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
-.service-card {
-  background: var(--blue);
-  border-radius: 10px;
-  padding: 3rem 1.5rem 2rem;
+.medical-table th {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #333;
+  padding-bottom: 10px;
+}
+.medical-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.medical-table td:nth-child(2),
+.medical-table td:nth-child(3) {
+  text-align: center;
+  width: 60px;
+}
+
+/* Donating Breast Milk */
+.mcq-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  outline: none;
+  gap: 25px;
 }
-.service-card:hover, .service-card:focus {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(28,111,171,0.3);
-}
-.service-icon svg { width: 90px; height: 90px; }
-.service-card h3 {
-  font-family: var(--ff);
-  font-size: 18px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: 0.05em;
-  text-align: center;
-}
-.service-card p {
-  font-family: var(--ff);
-  font-size: 13px;
+.mcq-question {
+  font-size: 0.95rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.85);
-  text-align: center;
-  letter-spacing: 0.02em;
+  color: #444;
+  margin-bottom: 5px;
+}
+.mcq-subtext {
+  font-size: 0.85rem;
+  color: #777;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.mcq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 15px;
+}
+.mcq-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.mcq-label input[type="radio"] {
+  margin-top: 4px;
+}
+.mcq-text {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Date/Time */
+.datetime-field {
+  padding-left: 15px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.datetime-field label {
+  font-size: 0.95rem;
+  color: #555;
+}
+.datetime-field input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Consent Section */
+.consent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
+}
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+.consent-label input[type="checkbox"] {
+  margin-top: 5px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--blue);
+}
+.consent-text {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+}
+.consent-text strong {
+  color: #333;
 }
 
 /* ════════════════════
