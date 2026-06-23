@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { submitDonorApplication } from '@/services/donor.service'
 
 // ── Types ──
 type RadioVal = 'yes' | 'no' | null
@@ -91,12 +92,32 @@ export default function DonateForm() {
   )
 
   // ── Form Submission Handler ──
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log("Form Data Submitted:", form);
-    alert("Thank you! Your donation form has been submitted.");
+    try {
+      const donorDetails = {
+        first_name: form.firstName,
+        last_name: form.lastName,
+        age: Number(form.age),
+        civil_status: form.civilStatus,
+        occupation: form.occupation,
+        email: form.email,
+        contact_number: form.contactNumber,
+        address: form.address,
+        emergency_contact_name: form.emergencyName,
+        emergency_contact_number: form.emergencyContact,
+      };
 
+      await submitDonorApplication(donorDetails, form.medicalHistory);
+      alert('Application submitted successfully!');
+      
+      // Optionally reset form
+      setForm(initialForm);
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Failed to submit application. Please try again.');
+    }
   }
 
   return (
