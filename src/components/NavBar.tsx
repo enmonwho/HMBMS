@@ -56,7 +56,7 @@ function NavBar() {
             </div>
           </div>
 
-          {/* Desktop How to Donate dropdown */}
+          {/* ── DESKTOP "HOW TO DONATE" DROPDOWN ── */}
           <div
             className="nav-dropdown"
             onMouseEnter={() => setDonateOpen(true)}
@@ -69,12 +69,12 @@ function NavBar() {
               onClick={() => setDonateOpen(v => !v)}
               onKeyDown={e => e.key === 'Escape' && setDonateOpen(false)}
             >
-              How to Donate <span className="caret">▾</span>
+              HOW TO DONATE <span className="caret">▾</span>
             </button>
             <div className={`dropdown-menu ${donateOpen ? 'show' : ''}`} role="menu">
-              <a href="#" role="menuitem">Financial Donation</a>
-              <a href="/donate" role="menuitem">Donate Breast Milk</a>
-              <a href="#" role="menuitem">Volunteer</a>
+              <a href="/procedure" role="menuitem">Procedure</a>
+              <a href="/process" role="menuitem">Process</a>
+              <a href="/safety" role="menuitem">Safety</a>
             </div>
           </div>
         </nav>
@@ -130,9 +130,9 @@ function NavBar() {
         </a>
         {mobileDonateOpen && (
           <div className="mobile-submenu">
-            <a href="#" onClick={closeMobileMenu}>Financial Donation</a>
-            <a href="/donate" onClick={closeMobileMenu}>Donate Breast Milk</a>
-            <a href="#" onClick={closeMobileMenu}>Volunteer</a>
+            <a href="procedure" onClick={closeMobileMenu}>Procedure</a>
+            <a href="process" onClick={closeMobileMenu}>Process</a>
+            <a href="safety" onClick={closeMobileMenu}>Safety</a>
           </div>
         )}
 

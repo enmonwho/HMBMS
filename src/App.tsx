@@ -8,6 +8,9 @@ import WhoWeHelp from './WhoWeHelp';
 import MilkyWay from './MilkyWay';
 import SupsupTodo from './SupsupTodo';
 import MomsAct from './MomsAct';
+import Procedure from './Procedure';
+import Process from './Process';
+import Safety from './Safety';
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
           <Route path="/milky-way" element={<MilkyWay />} />
           <Route path="/supsup-todo" element={<SupsupTodo />} />
           <Route path="/moms-act" element={<MomsAct />} />
+          <Route path="/procedure" element={<Procedure />} />
+          <Route path="/process" element={<Process />} />
+          <Route path="/safety" element={<Safety />} />
         </Routes>
       </main>
 

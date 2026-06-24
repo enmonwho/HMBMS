@@ -383,6 +383,67 @@ a { color: inherit; text-decoration: none; }
 .btn-map:hover { background: var(--blue-dark); }
 
 /* ════════════════════
+   DONATION SERVICES
+════════════════════ */
+.services {
+  padding: 3.5rem 5rem 4rem;
+  background: var(--white);
+}
+.services-inner { max-width: var(--max); margin: 0 auto; }
+.services-header { margin-bottom: 2rem; }
+.services-header h2 {
+  font-family: var(--ff);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 900;
+  color: var(--blue);
+  margin-bottom: 0.6rem;
+}
+.services-rule {
+  width: 60%;
+  height: 0.5px;
+  background: var(--blue-navy);
+}
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.service-card {
+  background: var(--blue);
+  border-radius: 10px;
+  padding: 3rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.service-card:hover, .service-card:focus {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(28,111,171,0.3);
+}
+.service-icon svg { width: 90px; height: 90px; }
+.service-card h3 {
+  font-family: var(--ff);
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.service-card p {
+  font-family: var(--ff);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* ════════════════════
    DONATION FORM
 ════════════════════ */
 
@@ -1371,5 +1432,125 @@ body.donate-page{
     padding: 30px 20px;
     font-size: 1rem;
     border-radius: 8px;
+  }
+}
+
+/* ════════════════════════════════════
+   HOW TO DONATE (Procedure/Process/Safety)
+══════════════════════════════════════ */
+
+.donate-info-wrapper {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+}
+
+.donate-info-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 0;
+}
+
+.donate-info-card {
+  background: #ffffff;
+  max-width: 900px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  padding: 60px 80px;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.donate-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background-image: url('/src/assets/mhmb-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.donate-info-header {
+  margin-bottom: 50px;
+}
+
+.donate-info-header h1 {
+  font-family: var(--ff);
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #115da9;
+  border-left: 8px solid #5aa1df;
+  padding-left: 20px;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.donate-info-header p {
+  font-family: var(--ff);
+  font-size: 1.1rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.donate-info-section {
+  margin-bottom: 40px;
+}
+
+.donate-info-section h2 {
+  font-family: var(--ff);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #115da9;
+  margin-bottom: 15px;
+}
+
+.donate-info-section ol {
+  padding-left: 20px;
+}
+
+.donate-info-section li {
+  font-family: var(--ff);
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .donate-info-card {
+    padding: 40px 30px;
+  }
+  
+  .donate-info-header h1 {
+    font-size: 2.5rem;
+    border-left: 6px solid #5aa1df;
+    padding-left: 15px;
+  }
+  
+  .donate-info-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .donate-watermark {
+    width: 250px;
+    height: 250px;
   }
 }
