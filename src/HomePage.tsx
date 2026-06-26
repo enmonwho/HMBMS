@@ -22,20 +22,9 @@ function useAnimatedCounter(target: number, duration = 1800, trigger: boolean) {
 }
 
 export default function HomePage() {
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [programsOpen, setProgramsOpen] = useState(false)
-  const [donateOpen, setDonateOpen] = useState(false)
   const [counterVisible, setCounterVisible] = useState(false)
   const totalRef = useRef<HTMLSpanElement>(null)
   const animatedTotal = useAnimatedCounter(785, 1800, counterVisible)
-
-  // Navbar scroll shadow
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   // Intersection observer for the counter
   useEffect(() => {
@@ -82,10 +71,6 @@ export default function HomePage() {
     })
     return () => obs.disconnect()
   }, [])
-
-  const closeMobileMenu = () => {
-    setMenuOpen(false)
-  }
 
   return (
     <>

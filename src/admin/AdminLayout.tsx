@@ -1,0 +1,141 @@
+import { useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Home,
+  User,
+  FlaskConical,
+  Baby,
+  Phone,
+  Settings,
+  BarChart3,
+  ChevronDown,
+} from 'lucide-react';
+import logo from '../assets/mhmb-logo.png';
+import { adminNavGroups } from './navConfig';
+import './admin.css';
+
+// Maps each nav group label to its line-icon component, matching the
+// clean outline style from the Canva design (replaces the old emoji icons).
+const GROUP_ICONS: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  'DONOR MANAGEMENT': User,
+  'PROCESSING': FlaskConical,
+  'BENEFICIARIES': Baby,
+  'SUPPORT': Phone,
+  'ADMINISTRATION': Settings,
+};
+
+export default function AdminLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Expand whichever group contains the current route by default.
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    adminNavGroups.forEach(group => {
+      initial[group.label] = location.pathname.startsWith(group.basePath);
+    });
+    return initial;
+  });
+
+  const toggleGroup = (label: string) => {
+    setOpenGroups(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const handleLogout = () => {
+    // No auth/session wiring yet — once the backend exists this should
+    // clear the session/token before redirecting.
+    navigate('/admin/login');
+  };
+
+  return (
+    <div className="admin-root">
+      <div className="admin-page">
+        <div className="admin-topbar">
+          <div className="admin-topbar-brand">
+            <div className="admin-sidebar-logo">
+              <img src={logo} alt="Makati Human Milk Bank" />
+              <span>MAKATI HUMAN MILK BANK</span>
+            </div>
+          </div>
+          <div className="admin-topbar-fill" />
+        </div>
+
+        <div className="admin-shell">
+          <aside className="admin-sidebar" aria-label="Admin navigation">
+            <nav className="admin-nav">
+            <NavLink
+              to="/admin/dashboard"
+              className={({ isActive }) =>
+                `admin-nav-toplink${isActive ? ' active' : ''}`
+              }
+            >
+              <span className="admin-nav-icon" aria-hidden="true"><Home size={17} strokeWidth={2} /></span>
+              DASHBOARD
+            </NavLink>
+
+            {adminNavGroups.map(group => {
+              const isOpen = !!openGroups[group.label];
+              const hasActive = location.pathname.startsWith(group.basePath);
+              const GroupIcon = GROUP_ICONS[group.label] ?? User;
+              return (
+                <div
+                  key={group.label}
+                  className={`admin-nav-group${hasActive ? ' has-active' : ''}`}
+                >
+                  <button
+                    type="button"
+                    className={`admin-nav-grouptoggle${hasActive ? ' has-active' : ''}`}
+                    aria-expanded={isOpen}
+                    onClick={() => toggleGroup(group.label)}
+                  >
+                    <span className="admin-nav-icon" aria-hidden="true"><GroupIcon size={17} strokeWidth={2} /></span>
+                    {group.label}
+                    <span className="admin-nav-caret" aria-hidden="true"><ChevronDown size={13} strokeWidth={2.5} /></span>
+                  </button>
+                  {isOpen && (
+                    <div className="admin-nav-sublist">
+                      {group.children.map(child => (
+                        <NavLink
+                          key={child.path}
+                          to={child.path}
+                          className={({ isActive }) =>
+                            `admin-nav-sublink${isActive ? ' active' : ''}`
+                          }
+                        >
+                          {child.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <NavLink
+              to="/admin/reports"
+              className={({ isActive }) =>
+                `admin-nav-toplink${isActive ? ' active' : ''}`
+              }
+            >
+              <span className="admin-nav-icon" aria-hidden="true"><BarChart3 size={17} strokeWidth={2} /></span>
+              REPORTS
+            </NavLink>
+            </nav>
+
+            <div className="admin-sidebar-footer">
+              <button type="button" className="admin-logout-btn" onClick={handleLogout}>
+                LOG OUT
+              </button>
+            </div>
+          </aside>
+
+          <div className="admin-main">
+            <div className="admin-content">
+              <Outlet />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
