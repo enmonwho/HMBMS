@@ -19,7 +19,7 @@
   --white:        #ffffff;
   --off:          #f4f8fc;
   --border:       rgba(0,0,0,0.09);
-  --max:          1200px;
+  --max:          100%;
   --ff:           'Montserrat', sans-serif;
   --ff-body:      'Open Sans', sans-serif;
 }
@@ -152,6 +152,26 @@ a { color: inherit; text-decoration: none; }
 .mobile-menu a { font-family: var(--ff); font-size: 14px; font-weight: 600; color: var(--text); padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
 .mobile-donate-link { margin-top: 0.5rem !important; background: var(--blue-mid) !important; color: #fff !important; text-align: center; padding: 0.85rem !important; border-radius: 4px; border-bottom: none !important; }
 
+/* Mobile Submenu Styling */
+.mobile-submenu {
+  display: flex;
+  flex-direction: column;
+  background: #f8fbf9;
+  padding-left: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-submenu a {
+  border-bottom: none;
+  padding: 0.5rem 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.mobile-submenu a:last-child {
+  padding-bottom: 0.85rem;
+}
+
 /* ════════════════════
    HERO
 ════════════════════ */
@@ -203,7 +223,7 @@ a { color: inherit; text-decoration: none; }
 ════════════════════ */
 .main-section {
   background: var(--off);
-  padding: 3rem 2rem 3.5rem;
+  padding: 3rem 5rem 3.5rem;
 }
 .main-layout {
   max-width: var(--max);
@@ -211,7 +231,7 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: 1fr 280px;
   gap: 2.5rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* ── Report Card ── */
@@ -366,7 +386,7 @@ a { color: inherit; text-decoration: none; }
    DONATION SERVICES
 ════════════════════ */
 .services {
-  padding: 3.5rem 2rem 4rem;
+  padding: 3.5rem 5rem 4rem;
   background: var(--white);
 }
 .services-inner { max-width: var(--max); margin: 0 auto; }
@@ -421,6 +441,139 @@ a { color: inherit; text-decoration: none; }
   color: rgba(255,255,255,0.85);
   text-align: center;
   letter-spacing: 0.02em;
+}
+
+/* ════════════════════
+   DONATION FORM
+════════════════════ */
+
+.section-title-line {
+  font-family: var(--ff);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--blue);
+  border-bottom: 2px solid var(--blue);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+.section-subtitle {
+  font-family: var(--ff);
+  font-size: 0.95rem;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+/* Medical & Lifestyle */
+.medical-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+.medical-table th {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #333;
+  padding-bottom: 10px;
+}
+.medical-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.medical-table td:nth-child(2),
+.medical-table td:nth-child(3) {
+  text-align: center;
+  width: 60px;
+}
+
+/* Donating Breast Milk */
+.mcq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+.mcq-question {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 5px;
+}
+.mcq-subtext {
+  font-size: 0.85rem;
+  color: #777;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.mcq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 15px;
+}
+.mcq-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.mcq-label input[type="radio"] {
+  margin-top: 4px;
+}
+.mcq-text {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Date/Time */
+.datetime-field {
+  padding-left: 15px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.datetime-field label {
+  font-size: 0.95rem;
+  color: #555;
+}
+.datetime-field input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Consent Section */
+.consent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
+}
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+.consent-label input[type="checkbox"] {
+  margin-top: 5px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--blue);
+}
+.consent-text {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+}
+.consent-text strong {
+  color: #333;
 }
 
 /* ════════════════════
@@ -563,7 +716,7 @@ a { color: inherit; text-decoration: none; }
 ════════════════════ */
 .quote-block {
   background: #fff;
-  padding: 5rem 2rem;
+  padding: 5rem 5rem;
 }
 .quote-inner {
   max-width: var(--max);
@@ -606,7 +759,7 @@ a { color: inherit; text-decoration: none; }
 .footer-main {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 3.5rem 2rem;
+  padding: 3.5rem 5rem;
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   gap: 3rem;
@@ -876,4 +1029,528 @@ body.donate-page{
     .milk-logo img{
         width:95px;
     }
+}
+
+/* ════ ABOUT US PAGE ════ */
+.about-page-wrapper {
+  background-image: linear-gradient(rgba(41, 128, 185, 0.85), rgba(41, 128, 185, 0.85)), url('/images/image9.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 60px 20px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.about-hero-title {
+  color: white;
+  font-size: 4.5rem;
+  font-weight: bold;
+  margin-bottom: 50px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.about-content-grid {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.about-text-container {
+  flex: 2;
+  background-color: white;
+  padding: 40px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #333;
+}
+
+.about-images-container {
+  flex: 1;
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.about-images-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .about-content-grid {
+    flex-direction: column;
+  }
+
+  .about-hero-title {
+    font-size: 3rem;
+  }
+
+  .about-text-container {
+    padding: 20px;
+  }
+}
+
+/* ════ WHO WE HELP PAGE ════ */
+
+.who-page-wrapper {
+  background-color: #ffffff; 
+  padding-bottom: 80px;
+}
+
+.who-hero {
+  background-image: linear-gradient(rgba(41, 128, 185, 0.85), rgba(41, 128, 185, 0.85)), url('/images/image8.png');
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.who-hero-title {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.who-hero-subtitle {
+  max-width: 850px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.who-gallery-section {
+  max-width: 1200px;
+  margin: 60px auto 0;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.who-gallery-title {
+  color: #0b5e91;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.who-gallery-grid {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+.who-gallery-img {
+  flex: 1;
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .who-hero {
+    padding: 80px 20px;
+  }
+
+  .who-hero-title {
+    font-size: 2.8rem;
+  }
+
+  .who-hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .who-gallery-grid {
+    flex-direction: column; 
+    gap: 20px;
+  }
+}
+
+/* ════ MILKY WAY PAGE ════ */
+
+.milky-page-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.milky-hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7)), url('/images/patient.png');
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.milky-hero-title {
+  font-size: 4.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.milky-hero-subtitle {
+  font-size: 1.5rem;
+  font-weight: normal;
+  letter-spacing: 1px;
+  max-width: 600px;
+  line-height: 1.4;
+}
+
+.milky-content-area {
+  background-color: #217dbb;
+  padding: 60px 20px 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.milky-text-card {
+  background-color: white;
+  max-width: 800px;
+  width: 100%;
+  padding: 60px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .milky-hero {
+    padding: 80px 20px;
+    min-height: 300px;
+  }
+
+  .milky-hero-title {
+    font-size: 3rem;
+  }
+
+  .milky-hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .milky-content-area {
+    padding: 40px 15px 80px;
+  }
+
+  .milky-text-card {
+    padding: 30px 20px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+}
+
+/* ════ SUPSUP TODO PAGE ════ */
+
+.supsup-page-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.supsup-hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/images/image13.png');
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.supsup-hero-title {
+  font-size: 4.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.supsup-hero-subtitle {
+  font-size: 1.5rem;
+  font-weight: normal;
+  letter-spacing: 1px;
+  max-width: 600px;
+  line-height: 1.4;
+}
+
+.supsup-content-area {
+  background-color: #217dbb; 
+  padding: 60px 20px 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.supsup-text-card {
+  background-color: white;
+  max-width: 800px;
+  width: 100%;
+  padding: 60px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .supsup-hero {
+    padding: 80px 20px;
+    min-height: 300px;
+  }
+
+  .supsup-hero-title {
+    font-size: 3rem;
+  }
+
+  .supsup-hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .supsup-content-area {
+    padding: 40px 15px 80px;
+  }
+
+  .supsup-text-card {
+    padding: 30px 20px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+}
+
+/* ════ MOM'S ACT PAGE ════ */
+
+.momsact-page-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.momsact-hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/images/image12.png');
+  background-size: cover;
+  background-position: center;
+  padding: 120px 20px;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.momsact-hero-title {
+  font-size: 4.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.momsact-hero-subtitle {
+  font-size: 1.5rem;
+  font-weight: normal;
+  letter-spacing: 1px;
+  max-width: 600px;
+  line-height: 1.4;
+}
+
+.momsact-content-area {
+  background-color: #217dbb; 
+  padding: 60px 20px 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.momsact-text-card {
+  background-color: white;
+  max-width: 800px;
+  width: 100%;
+  padding: 60px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .momsact-hero {
+    padding: 80px 20px;
+    min-height: 300px;
+  }
+
+  .momsact-hero-title {
+    font-size: 3rem;
+  }
+
+  .momsact-hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .momsact-content-area {
+    padding: 40px 15px 80px;
+  }
+
+  .momsact-text-card {
+    padding: 30px 20px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+}
+
+/* ════════════════════════════════════
+   HOW TO DONATE (Procedure/Process/Safety)
+══════════════════════════════════════ */
+
+.donate-info-wrapper {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+}
+
+.donate-info-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 0;
+}
+
+.donate-info-card {
+  background: #ffffff;
+  max-width: 900px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  padding: 60px 80px;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.donate-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background-image: url('/src/assets/mhmb-logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.donate-info-header {
+  margin-bottom: 50px;
+}
+
+.donate-info-header h1 {
+  font-family: var(--ff);
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #115da9;
+  border-left: 8px solid #5aa1df;
+  padding-left: 20px;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.donate-info-header p {
+  font-family: var(--ff);
+  font-size: 1.1rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.donate-info-section {
+  margin-bottom: 40px;
+}
+
+.donate-info-section h2 {
+  font-family: var(--ff);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #115da9;
+  margin-bottom: 15px;
+}
+
+.donate-info-section ol {
+  padding-left: 20px;
+}
+
+.donate-info-section li {
+  font-family: var(--ff);
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .donate-info-card {
+    padding: 40px 30px;
+  }
+  
+  .donate-info-header h1 {
+    font-size: 2.5rem;
+    border-left: 6px solid #5aa1df;
+    padding-left: 15px;
+  }
+  
+  .donate-info-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .donate-watermark {
+    width: 250px;
+    height: 250px;
+  }
 }
