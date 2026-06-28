@@ -152,30 +152,27 @@ export default function Donors() {
             aria-label="Search donor"
           />
         </div>
-        <div className="flex gap-1.5 shrink-0 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex gap-1 shrink-0 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
           <button
             type="button"
             onClick={() => setStatusFilter('ALL')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${statusFilter === 'ALL' ? 'bg-(--admin-navy) text-white shadow-md scale-100' : 'bg-transparent text-slate-600 hover:bg-slate-50 hover:text-(--admin-navy) scale-95 hover:scale-100'}`}
+            className={`flex items-center justify-center gap-2 px-6 py-1.5 rounded-md text-sm font-semibold transition-all duration-200 ${statusFilter === 'ALL' ? 'bg-(--admin-navy) text-white shadow-sm' : 'bg-transparent text-slate-600 hover:bg-slate-200 hover:text-(--admin-navy)'}`}
           >
-            <Users weight={statusFilter === 'ALL' ? 'fill' : 'bold'} size={18} />
-            All <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{donors.length}</span>
+            All <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'}`}>{donors.length}</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('ACTIVE')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${statusFilter === 'ACTIVE' ? 'bg-emerald-600 text-white shadow-md scale-100' : 'bg-transparent text-slate-600 hover:bg-slate-50 hover:text-emerald-600 scale-95 hover:scale-100'}`}
+            className={`flex items-center justify-center gap-2 px-6 py-1.5 rounded-md text-sm font-semibold transition-all duration-200 ${statusFilter === 'ACTIVE' ? 'bg-(--admin-navy) text-white shadow-sm' : 'bg-transparent text-slate-600 hover:bg-slate-200 hover:text-(--admin-navy)'}`}
           >
-            <UserFocus weight={statusFilter === 'ACTIVE' ? 'fill' : 'bold'} size={18} />
-            Active <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'ACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{activeCount}</span>
+            Active <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'ACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'}`}>{activeCount}</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('INACTIVE')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${statusFilter === 'INACTIVE' ? 'bg-rose-600 text-white shadow-md scale-100' : 'bg-transparent text-slate-600 hover:bg-slate-50 hover:text-rose-600 scale-95 hover:scale-100'}`}
+            className={`flex items-center justify-center gap-2 px-6 py-1.5 rounded-md text-sm font-semibold transition-all duration-200 ${statusFilter === 'INACTIVE' ? 'bg-(--admin-navy) text-white shadow-sm' : 'bg-transparent text-slate-600 hover:bg-slate-200 hover:text-(--admin-navy)'}`}
           >
-            <UserMinus weight={statusFilter === 'INACTIVE' ? 'fill' : 'bold'} size={18} />
-            Inactive <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'INACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{inactiveCount}</span>
+            Inactive <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'INACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'}`}>{inactiveCount}</span>
           </button>
         </div>
       </div>
