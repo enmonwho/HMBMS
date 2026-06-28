@@ -26,9 +26,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session?.user) {
         const { data } = await supabase
-          .from('users')
+          .from('profiles')
           .select('role')
-          .eq('id', session.user.id)
+          .eq('user_id', session.user.id)
           .single();
         
         if (data) {
@@ -47,9 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       if (session?.user) {
         const { data } = await supabase
-          .from('users')
+          .from('profiles')
           .select('role')
-          .eq('id', session.user.id)
+          .eq('user_id', session.user.id)
           .single();
         if (data) setRole(data.role);
       } else {
