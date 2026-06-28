@@ -55,14 +55,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: 'DISPENSING', path: '/beneficiaries/dispensing', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] },
     ],
   },
-  {
-    label: 'SUPPORT',
-    basePath: '/support',
-    allowedRoles: ALL_ROLES,
-    children: [
-      { label: 'HOTLINE', path: '/support/hotline', allowedRoles: ALL_ROLES },
-    ],
-  },
+
   {
     label: 'ADMINISTRATION',
     basePath: '/administration',

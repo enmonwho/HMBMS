@@ -21,7 +21,7 @@ import Pasteurization from './admin/pages/Pasteurization';
 import Inventory from './admin/pages/Inventory';
 import Beneficiaries from './admin/pages/Beneficiaries';
 import Dispensing from './admin/pages/Dispensing';
-import Hotline from './admin/pages/Hotline';
+
 import Reports from './admin/pages/Reports';
 import UserManagement from './admin/pages/UserManagement';
 import ProtectedRoute from './admin/components/ProtectedRoute';
@@ -71,7 +71,7 @@ function App() {
                 <Route path="beneficiaries/dispensing" element={<Dispensing />} />
               </Route>
               
-              <Route path="support/hotline" element={<Hotline />} />
+
               
               <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Medical Technologist']} />}>
                 <Route path="reports" element={<Reports />} />
