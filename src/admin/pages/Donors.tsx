@@ -274,12 +274,14 @@ export default function Donors() {
               </div>
 
               <div className="mt-2 flex gap-3">
-                <button 
-                  onClick={() => setIsCollectionModalOpen(true)}
-                  className="admin-pill-action-btn w-full py-3 rounded-lg font-semibold bg-(--admin-navy) text-white hover:bg-(--admin-navy-dark) transition-colors shadow-sm"
-                >
-                  Start Collection
-                </button>
+                {canEdit && (
+                  <button 
+                    onClick={() => setIsCollectionModalOpen(true)}
+                    className="admin-pill-action-btn w-full py-3 rounded-lg font-semibold bg-(--admin-navy) text-white hover:bg-(--admin-navy-dark) transition-colors shadow-sm"
+                  >
+                    Start Collection
+                  </button>
+                )}
                 {canEdit && (
                   <button 
                     onClick={() => {

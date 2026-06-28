@@ -251,7 +251,7 @@ export default function Inventory() {
                 <th>Storage</th>
                 <th>Expiry Date</th>
                 <th>Status</th>
-                <th>Action</th>
+                {canEdit && <th>Action</th>}
               </tr>
             </thead>
             <tbody>

@@ -350,13 +350,15 @@ export default function Applicants() {
             aria-label="Search applicants"
           />
         </div>
-        <button
-          className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <UserPlus size={18} weight="bold" />
-          New Applicant
-        </button>
+        {canEdit && (
+          <button
+            className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <UserPlus size={18} weight="bold" />
+            New Applicant
+          </button>
+        )}
       </div>
 
       {/* Main Content Area */}
@@ -509,7 +511,7 @@ export default function Applicants() {
                       </div>
                     )}
                     
-                    {selectedApplicant.status !== 'PENDING' && (
+                    {selectedApplicant.status !== 'PENDING' && canEdit && (
                       <button 
                         onClick={() => handleUpdateStatus(selectedApplicant.id, 'PENDING')}
                         className="w-full py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
