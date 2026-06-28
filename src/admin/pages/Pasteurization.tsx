@@ -29,9 +29,13 @@ export default function Pasteurization() {
   const [createData, setCreateData] = useState<{
     batch_id: string;
     collection_ids: string[];
+    temperature_c: string;
+    duration_minutes: string;
   }>({
     batch_id: '',
     collection_ids: [],
+    temperature_c: '',
+    duration_minutes: '',
   });
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -93,6 +97,8 @@ export default function Pasteurization() {
           collection_id: createData.collection_ids[0],
           collection_ids: createData.collection_ids,
           total_volume_ml: totalVolume,
+          temperature_c: createData.temperature_c ? parseFloat(createData.temperature_c) : null,
+          duration_minutes: createData.duration_minutes ? parseInt(createData.duration_minutes, 10) : null,
           status: 'PENDING'
         }])
         .select()
@@ -109,7 +115,7 @@ export default function Pasteurization() {
       setBatches(prev => [data, ...prev]);
       setPassedCollections(prev => prev.filter(c => !createData.collection_ids.includes(c.id)));
       setIsCreateModalOpen(false);
-      setCreateData({ batch_id: '', collection_ids: [] });
+      setCreateData({ batch_id: '', collection_ids: [], temperature_c: '', duration_minutes: '' });
     } catch (err) {
       console.error('Error creating batch:', err);
       alert('Failed to create batch.');
@@ -342,6 +348,33 @@ export default function Pasteurization() {
                     </span>
                   </div>
                 )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="create_temp" className="text-sm font-medium text-slate-700">Temperature (°C)</label>
+                  <input
+                    id="create_temp"
+                    type="number"
+                    step="0.1"
+                    className="admin-modal-input"
+                    placeholder="e.g. 62.5"
+                    value={createData.temperature_c}
+                    onChange={e => setCreateData({ ...createData, temperature_c: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="create_duration" className="text-sm font-medium text-slate-700">Duration (minutes)</label>
+                  <input
+                    id="create_duration"
+                    type="number"
+                    className="admin-modal-input"
+                    placeholder="e.g. 30"
+                    value={createData.duration_minutes}
+                    onChange={e => setCreateData({ ...createData, duration_minutes: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
