@@ -277,10 +277,32 @@ export default function Donors() {
                 e.preventDefault();
                 setIsSubmitting(true);
                 try {
+                  const vol = parseInt(collectionForm.volume_ml, 10);
+                  if (vol < 30 || vol > 240) {
+                     alert("Collection volume must be between 30 mL and 240 mL per session.");
+                     setIsSubmitting(false);
+                     return;
+                  }
+
+                  const todayDate = new Date().toISOString().split('T')[0];
+                  const { data: todayCollections } = await supabase
+                    .from('milk_collections')
+                    .select('volume_ml')
+                    .eq('donor_id', selectedDonor.id)
+                    .gte('collection_date', `${todayDate}T00:00:00.000Z`)
+                    .lte('collection_date', `${todayDate}T23:59:59.999Z`);
+                    
+                  const totalToday = (todayCollections || []).reduce((sum, c) => sum + c.volume_ml, 0);
+                  if (totalToday + vol > 800) {
+                     alert(`Daily limit exceeded! This donor has already donated ${totalToday} mL today. Adding ${vol} mL exceeds the 800 mL/day limit.`);
+                     setIsSubmitting(false);
+                     return;
+                  }
+
                   const newBarcode = `BAR-${Math.random().toString(36).substring(2, 6)}`;
                   const { error } = await supabase.from('milk_collections').insert([{
                     donor_id: selectedDonor.id,
-                    volume_ml: parseInt(collectionForm.volume_ml, 10),
+                    volume_ml: vol,
                     status: 'PENDING LABORATORY',
                     barcode: newBarcode,
                     collection_date: new Date().toISOString()

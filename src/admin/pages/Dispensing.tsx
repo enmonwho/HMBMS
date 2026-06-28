@@ -35,6 +35,10 @@ export default function Dispensing() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [docAbstract, setDocAbstract] = useState(false);
+  const [docPrescription, setDocPrescription] = useState(false);
+  const [docCooler, setDocCooler] = useState(false);
+
   async function fetchRecords() {
     try {
       setLoading(true);
@@ -158,6 +162,9 @@ export default function Dispensing() {
         dispensed_date: new Date().toISOString().split('T')[0],
         contact_number: '',
       });
+      setDocAbstract(false);
+      setDocPrescription(false);
+      setDocCooler(false);
       alert(formData.contact_number ? 'Milk successfully dispensed and SMS notification sent!' : 'Milk successfully dispensed!');
     } catch (err) {
       console.error('Error dispensing milk:', err);
@@ -313,6 +320,22 @@ export default function Dispensing() {
                 />
               </div>
 
+              <div className="space-y-2 mt-4 border-t border-slate-100 pt-4 bg-amber-50/50 p-3 rounded-md">
+                <p className="text-sm font-semibold text-slate-800">Required Document Verification</p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={docAbstract} onChange={e => setDocAbstract(e.target.checked)} className="rounded border-slate-300 text-(--admin-navy)" />
+                  <span className="text-sm text-slate-700">Clinical Abstract is on file</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={docPrescription} onChange={e => setDocPrescription(e.target.checked)} className="rounded border-slate-300 text-(--admin-navy)" />
+                  <span className="text-sm text-slate-700">Pediatrician Prescription is on file</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={docCooler} onChange={e => setDocCooler(e.target.checked)} className="rounded border-slate-300 text-(--admin-navy)" />
+                  <span className="text-sm text-slate-700">Cooler with ice confirmed physically</span>
+                </label>
+              </div>
+
               <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
                 <button
                   type="button"
@@ -325,7 +348,7 @@ export default function Dispensing() {
                 <button
                   type="submit"
                   className="admin-btn-save"
-                  disabled={isSubmitting || activeBeneficiaries.length === 0 || availableInventory.length === 0}
+                  disabled={isSubmitting || activeBeneficiaries.length === 0 || availableInventory.length === 0 || !docAbstract || !docPrescription || !docCooler}
                 >
                   {isSubmitting ? 'Dispensing...' : 'Confirm Dispensing'}
                 </button>
