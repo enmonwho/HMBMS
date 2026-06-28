@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import { supabase } from '../../shared/lib/supabase';
-import { Warning, Clock } from '@phosphor-icons/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#10b981', '#f43f5e', '#f59e0b', '#0ea5e9'];
@@ -15,8 +14,6 @@ export default function Dashboard() {
   });
   const [collectionData, setCollectionData] = useState<{name: string, volume: number}[]>([]);
   const [donorData, setDonorData] = useState<{name: string, value: number}[]>([]);
-  const [totalVolume, setTotalVolume] = useState(0);
-  const [expiringBatches, setExpiringBatches] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -65,23 +62,6 @@ export default function Dashboard() {
           ]);
         }
 
-        // Process Inventory Alerts
-        const { data: invList } = await supabase.from('inventory').select('id, barcode, volume_ml, expiry_date').eq('status', 'AVAILABLE');
-        if (invList) {
-          const totalVol = invList.reduce((sum, item) => sum + (item.volume_ml || 0), 0);
-          setTotalVolume(totalVol);
-          
-          const now = new Date();
-          const sevenDaysFromNow = new Date();
-          sevenDaysFromNow.setDate(now.getDate() + 7);
-          
-          const expiring = invList.filter(item => {
-             if (!item.expiry_date) return false;
-             const expDate = new Date(item.expiry_date);
-             return expDate <= sevenDaysFromNow;
-          });
-          setExpiringBatches(expiring);
-        }
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
       }
@@ -93,34 +73,6 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader title="Dashboard" />
-
-      {(totalVolume < 2000 || expiringBatches.length > 0) && (
-        <div className="flex flex-col gap-3 mb-6">
-          {totalVolume < 2000 && (
-            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-start gap-4 shadow-sm">
-              <div className="text-red-500 mt-1">
-                <Warning weight="fill" size={28} />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-lg mb-1">Low Stock Alert!</p>
-                <p className="text-sm opacity-90">Total available milk is dangerously low ({totalVolume} mL). Recommended minimum is 2,000 mL.</p>
-              </div>
-            </div>
-          )}
-          
-          {expiringBatches.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-start gap-4 shadow-sm">
-              <div className="text-amber-500 mt-1">
-                <Clock weight="fill" size={28} />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-lg mb-1">Batches Expiring Soon</p>
-                <p className="text-sm opacity-90">You have {expiringBatches.length} batch(es) expiring within the next 7 days. Prioritize dispensing these!</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="admin-stat-grid">
         <div className="admin-stat-card">
