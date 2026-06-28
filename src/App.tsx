@@ -8,7 +8,6 @@ import MilkyWay from './public-site/pages/MilkyWay';
 import SupsupTodo from './public-site/pages/SupsupTodo';
 import MomsAct from './public-site/pages/MomsAct';
 import Procedure from './public-site/pages/Procedure';
-import Process from './public-site/pages/Process';
 import Safety from './public-site/pages/Safety';
 
 import AdminLayout from './admin/layouts/AdminLayout';
@@ -43,7 +42,6 @@ function App() {
         <Route path="/supsup-todo" element={<SupsupTodo />} />
         <Route path="/moms-act" element={<MomsAct />} />
         <Route path="/procedure" element={<Procedure />} />
-        <Route path="/process" element={<Process />} />
         <Route path="/safety" element={<Safety />} />
       </Route>
 

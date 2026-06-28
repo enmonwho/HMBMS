@@ -77,9 +77,9 @@ export default function HomePage() {
       {/* ══ HERO ══ */}
       <section className="hero" id="home" aria-label="Hero">
         <div className="hero-bg">
-          <div className="hero-img hero-img-1" style={{ backgroundImage: 'url(/images/Milk.png)' }} />
-          <div className="hero-img hero-img-2" style={{ backgroundImage: 'url(/images/Center.png)' }} />
-          <div className="hero-img hero-img-3" style={{ backgroundImage: 'url(/images/Patient.png)' }} />
+          <div className="hero-img hero-img-1" style={{ backgroundImage: 'url(/images/milk.png)' }} />
+          <div className="hero-img hero-img-2" style={{ backgroundImage: 'url(/images/center.png)' }} />
+          <div className="hero-img hero-img-3" style={{ backgroundImage: 'url(/images/patient.png)' }} />
           <div className="hero-overlay" />
         </div>
         <div className="hero-content">

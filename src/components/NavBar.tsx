@@ -71,7 +71,6 @@ function NavBar() {
             </button>
             <div className={`dropdown-menu ${donateOpen ? 'show' : ''}`} role="menu">
               <a href="/procedure" role="menuitem">Procedure</a>
-              <a href="/process" role="menuitem">Process</a>
               <a href="/safety" role="menuitem">Safety</a>
             </div>
           </div>
@@ -129,7 +128,6 @@ function NavBar() {
         {mobileDonateOpen && (
           <div className="mobile-submenu">
             <a href="procedure" onClick={closeMobileMenu}>Procedure</a>
-            <a href="process" onClick={closeMobileMenu}>Process</a>
             <a href="safety" onClick={closeMobileMenu}>Safety</a>
           </div>
         )}
