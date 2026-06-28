@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
-import { mockReportStats } from '../../shared/lib/mockData';
 import type { ReportType } from '../../shared/lib/types';
 import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
@@ -26,27 +25,54 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const [stats, setStats] = useState({
+    totalDonorsThisMonth: 0,
+    totalVolumeCollectedLiters: '0.0',
+    totalVolumeDispensedLiters: '0.0',
+    expired: 0
+  });
+
   const { role } = useAuth();
   const canEdit = role !== 'Medical Technologist';
 
   useEffect(() => {
-    async function fetchReports() {
+    async function fetchData() {
       try {
-        const { data, error } = await supabase
+        const { data: reportsData, error: reportsError } = await supabase
           .from('generated_reports')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setReports(data || []);
+        if (reportsError) throw reportsError;
+        setReports(reportsData || []);
+
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        
+        const [donorsRes, collRes, dispRes, expRes] = await Promise.all([
+          supabase.from('donors').select('*', { count: 'exact', head: true }).gte('created_at', startOfMonth),
+          supabase.from('milk_collections').select('volume_ml'),
+          supabase.from('dispensing_records').select('total_volume_ml'),
+          supabase.from('inventory').select('*', { count: 'exact', head: true }).eq('status', 'EXPIRED')
+        ]);
+
+        const totalCollected = (collRes.data || []).reduce((sum, c) => sum + (c.volume_ml || 0), 0);
+        const totalDispensed = (dispRes.data || []).reduce((sum, d) => sum + (d.total_volume_ml || 0), 0);
+
+        setStats({
+          totalDonorsThisMonth: donorsRes.count || 0,
+          totalVolumeCollectedLiters: (totalCollected / 1000).toFixed(1),
+          totalVolumeDispensedLiters: (totalDispensed / 1000).toFixed(1),
+          expired: expRes.count || 0
+        });
       } catch (err) {
-        console.error('Error fetching generated reports:', err);
+        console.error('Error fetching reports page data:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchReports();
+    fetchData();
   }, []);
 
   const handleGenerate = async () => {
@@ -134,19 +160,19 @@ export default function Reports() {
       <div className="admin-stat-grid">
         <div className="admin-stat-card tone-green">
           <div className="admin-stat-label">Total Donors<br />(Current Month)</div>
-          <div className="admin-stat-value">{mockReportStats.totalDonorsThisMonth}</div>
+          <div className="admin-stat-value">{stats.totalDonorsThisMonth}</div>
         </div>
         <div className="admin-stat-card tone-amber">
           <div className="admin-stat-label">Total Volume Collected<br />(Liters)</div>
-          <div className="admin-stat-value">{mockReportStats.totalVolumeCollectedLiters}</div>
+          <div className="admin-stat-value">{stats.totalVolumeCollectedLiters}</div>
         </div>
         <div className="admin-stat-card tone-blue">
           <div className="admin-stat-label">Total Volume Dispensed<br />(Liters)</div>
-          <div className="admin-stat-value">{mockReportStats.totalVolumeDispensedLiters}</div>
+          <div className="admin-stat-value">{stats.totalVolumeDispensedLiters}</div>
         </div>
         <div className="admin-stat-card tone-red">
           <div className="admin-stat-label">Expired</div>
-          <div className="admin-stat-value">{mockReportStats.expired}</div>
+          <div className="admin-stat-value">{stats.expired}</div>
         </div>
       </div>
 

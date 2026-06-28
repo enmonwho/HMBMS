@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import { supabase } from '../../shared/lib/supabase';
+import { Warning, Clock } from '@phosphor-icons/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#10b981', '#f43f5e', '#f59e0b', '#0ea5e9'];
@@ -96,25 +97,25 @@ export default function Dashboard() {
       {(totalVolume < 2000 || expiringBatches.length > 0) && (
         <div className="flex flex-col gap-3 mb-6">
           {totalVolume < 2000 && (
-            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-red-500 font-bold text-xl">⚠️</span>
-                <div>
-                  <p className="font-bold">Low Stock Alert!</p>
-                  <p className="text-sm">Total available milk is dangerously low ({totalVolume} mL). Recommended minimum is 2,000 mL.</p>
-                </div>
+            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-start gap-4 shadow-sm">
+              <div className="text-red-500 mt-1">
+                <Warning weight="fill" size={28} />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-lg mb-1">Low Stock Alert!</p>
+                <p className="text-sm opacity-90">Total available milk is dangerously low ({totalVolume} mL). Recommended minimum is 2,000 mL.</p>
               </div>
             </div>
           )}
           
           {expiringBatches.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-amber-500 font-bold text-xl">⏱️</span>
-                <div>
-                  <p className="font-bold">Batches Expiring Soon</p>
-                  <p className="text-sm">You have {expiringBatches.length} batch(es) expiring within the next 7 days. Prioritize dispensing these!</p>
-                </div>
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-start gap-4 shadow-sm">
+              <div className="text-amber-500 mt-1">
+                <Clock weight="fill" size={28} />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-lg mb-1">Batches Expiring Soon</p>
+                <p className="text-sm opacity-90">You have {expiringBatches.length} batch(es) expiring within the next 7 days. Prioritize dispensing these!</p>
               </div>
             </div>
           )}
