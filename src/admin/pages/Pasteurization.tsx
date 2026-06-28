@@ -3,7 +3,7 @@ import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
-import { Plus, X, PencilSimple } from '@phosphor-icons/react';
+import { Plus, X, PencilSimple, CheckCircle } from '@phosphor-icons/react';
 
 interface BatchRecord {
   id: string;
@@ -178,6 +178,51 @@ export default function Pasteurization() {
     }
   };
 
+  const handleQuickPass = async (batch: BatchRecord) => {
+    if (batch.status === 'PASSED') return;
+    if (!confirm(`Mark batch ${batch.batch_id} as PASSED and add to inventory?`)) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { data: updatedBatch, error } = await supabase
+        .from('batches')
+        .update({ status: 'PASSED' })
+        .eq('id', batch.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const vol = batch.total_volume_ml || 0;
+      const expiry = new Date();
+      expiry.setMonth(expiry.getMonth() + 6);
+
+      const { error: invError } = await supabase
+        .from('inventory')
+        .insert([{
+          barcode: batch.batch_id,
+          volume_ml: vol,
+          status: 'AVAILABLE',
+          expiry_date: expiry.toISOString(),
+          storage_location: 'Freezer A'
+        }]);
+
+      if (invError) {
+        console.error('Inventory insertion error:', invError);
+        alert('Batch passed, but failed to auto-add to inventory.');
+      } else {
+        alert('Batch passed and successfully added to Inventory!');
+      }
+      
+      setBatches(prev => prev.map(b => b.id === batch.id ? updatedBatch : b));
+    } catch (err) {
+      console.error('Error quick passing batch:', err);
+      alert('Failed to update batch status.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const openUpdateModal = (batch: BatchRecord) => {
     setUpdateData({
       id: batch.id,
@@ -244,14 +289,28 @@ export default function Pasteurization() {
                   </td>
                   {canEdit && (
                     <td>
-                      <button
-                        type="button"
-                        className="admin-edit-btn"
-                        aria-label={`Update batch ${b.batch_id}`}
-                        onClick={() => openUpdateModal(b)}
-                      >
-                        <PencilSimple size={16} /> Update
-                      </button>
+                      <div className="flex items-center gap-3">
+                        {b.status !== 'PASSED' && b.status !== 'FAILED' && (
+                          <button
+                            type="button"
+                            className="admin-edit-btn text-emerald-600 hover:text-emerald-700"
+                            aria-label={`Pass batch ${b.batch_id}`}
+                            title="Mark as Passed"
+                            onClick={() => handleQuickPass(b)}
+                          >
+                            <CheckCircle size={20} weight="fill" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="admin-edit-btn"
+                          aria-label={`Update batch ${b.batch_id}`}
+                          title="Update batch"
+                          onClick={() => openUpdateModal(b)}
+                        >
+                          <PencilSimple size={20} />
+                        </button>
+                      </div>
                     </td>
                   )}
                 </tr>

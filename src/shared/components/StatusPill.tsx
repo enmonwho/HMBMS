@@ -21,6 +21,8 @@ const PILL_VARIANTS: Record<string, string> = {
   'CLEARED': 'admin-pill-active',
   'APPROVED': 'admin-pill-active',
   'RELEASED': 'admin-pill-active',
+  'PASSED': 'admin-pill-active',
+  'FAILED': 'admin-pill-rejected',
   'INACTIVE': 'admin-pill-neutral',
   'REJECTED': 'admin-pill-rejected',
   'EXPIRED': 'admin-pill-rejected',
