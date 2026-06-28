@@ -960,7 +960,7 @@ body.donate-page{
 .watermark{
     position:absolute;
     inset:0;
-    background:url("images/Logo.png") center center no-repeat;
+    background:url("/images/mhmb-logo.png") center center no-repeat;
     background-size:55%;
     opacity:.08;
     pointer-events:none;
