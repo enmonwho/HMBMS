@@ -117,7 +117,7 @@ export default function Applicants() {
   }
 
   useEffect(() => {
-    fetchApplicants();
+    setTimeout(fetchApplicants, 0);
   }, []);
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
@@ -290,11 +290,20 @@ export default function Applicants() {
   };
 
   const filteredApplicants = useMemo(() => {
+    const statusOrder: Record<string, number> = { PENDING: 0, APPROVED: 1, REJECTED: 2 };
     const q = search.trim().toLowerCase();
-    if (!q) return applicants;
-    return applicants.filter(a => {
-      const name = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
-      return name.includes(q) || (a.contact_number && a.contact_number.includes(q)) || (a.email && a.email.toLowerCase().includes(q));
+    let result = applicants;
+    if (q) {
+      result = result.filter(a => {
+        const name = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
+        return name.includes(q) || (a.contact_number && a.contact_number.includes(q)) || (a.email && a.email.toLowerCase().includes(q));
+      });
+    }
+    return [...result].sort((a, b) => {
+      const orderA = statusOrder[a.status] ?? 99;
+      const orderB = statusOrder[b.status] ?? 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [applicants, search]);
 
