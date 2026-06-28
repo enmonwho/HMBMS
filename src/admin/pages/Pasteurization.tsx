@@ -68,7 +68,7 @@ export default function Pasteurization() {
             volume_ml,
             donors ( applicants ( first_name, last_name ) )
           `)
-          .eq('status', 'PASSED'); // Passed from laboratory
+          .in('status', ['PASSED', 'COMPLETE']); // Passed from laboratory or bypassed directly
 
         if (!collError && collData) {
           setPassedCollections(collData);

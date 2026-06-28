@@ -30,6 +30,7 @@ export default function Donors() {
   const [donors, setDonors] = useState<DonorRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedDonor, setSelectedDonor] = useState<DonorRecord | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -70,13 +71,26 @@ export default function Donors() {
   }, []);
 
   const filteredDonors = useMemo(() => {
+    let result = donors;
+    
+    if (statusFilter !== 'ALL') {
+      result = result.filter(d => d.status === statusFilter);
+    }
+    
     const q = search.trim().toLowerCase();
-    if (!q) return donors;
-    return donors.filter(d =>
-      `${d.applicants?.first_name} ${d.applicants?.last_name}`.toLowerCase().includes(q) ||
-      d.donor_number?.toLowerCase().includes(q)
-    );
-  }, [donors, search]);
+    if (q) {
+      result = result.filter(d =>
+        `${d.applicants?.first_name} ${d.applicants?.last_name}`.toLowerCase().includes(q) ||
+        d.donor_number?.toLowerCase().includes(q)
+      );
+    }
+
+    return result.sort((a, b) => {
+      if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
+      if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [donors, search, statusFilter]);
 
   const activeCount = donors.filter(d => d.status === 'ACTIVE').length;
   const inactiveCount = donors.filter(d => d.status === 'INACTIVE').length;
@@ -123,15 +137,27 @@ export default function Donors() {
         </div>
       </div>
 
-      <div className="admin-searchbar mb-6">
-        <MagnifyingGlass className="admin-searchbar-icon text-slate-400" size={18} aria-hidden="true" />
-        <input
-          type="text"
-          placeholder="Search by name or ID..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          aria-label="Search donor"
-        />
+      <div className="flex gap-4 mb-6">
+        <div className="admin-searchbar flex-1 !mb-0">
+          <MagnifyingGlass className="admin-searchbar-icon text-slate-400" size={18} aria-hidden="true" />
+          <input
+            type="text"
+            placeholder="Search by name or ID..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            aria-label="Search donor"
+          />
+        </div>
+        <select 
+          className="admin-modal-input w-48 !mb-0" 
+          value={statusFilter} 
+          onChange={e => setStatusFilter(e.target.value)}
+          aria-label="Filter by status"
+        >
+          <option value="ALL">All Statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
       </div>
 
       <div className="admin-with-panel flex gap-6 items-start">
@@ -303,7 +329,7 @@ export default function Donors() {
                   const { error } = await supabase.from('milk_collections').insert([{
                     donor_id: selectedDonor.id,
                     volume_ml: vol,
-                    status: 'PENDING LABORATORY',
+                    status: 'COMPLETE',
                     barcode: newBarcode,
                     collection_date: new Date().toISOString()
                   }]);
