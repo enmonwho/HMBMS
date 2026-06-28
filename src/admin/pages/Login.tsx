@@ -1,26 +1,56 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/mhmb-logo.png';
 import '../admin.css';
+import { supabase } from '../../shared/lib/supabase';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const location = useLocation();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // If user is already logged in, redirect them
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/admin/dashboard');
+      }
+    });
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username.trim() || !password.trim()) {
-      setError('Please enter both your username and password.');
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both your email and password.');
       return;
     }
 
-    // No backend yet — once the auth/database branch lands, replace this
-    // with a real credential check against the API.
+    setLoading(true);
     setError('');
-    navigate('/admin/dashboard');
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      const from = location.state?.from?.pathname || '/admin/dashboard';
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred during login.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,15 +65,15 @@ export default function Login() {
           <p>Log in to your account</p>
 
           <div className="admin-login-field">
-            <label htmlFor="admin-username" className="sr-only" style={{ position: 'absolute', left: '-9999px' }}>
-              Username
+            <label htmlFor="admin-email" className="sr-only" style={{ position: 'absolute', left: '-9999px' }}>
+              Email
             </label>
             <input
-              id="admin-username"
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              id="admin-email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               autoComplete="username"
             />
           </div>
@@ -64,8 +94,8 @@ export default function Login() {
 
           {error && <p className="admin-login-error" role="alert">{error}</p>}
 
-          <button type="submit" className="admin-login-submit">
-            LOGIN
+          <button type="submit" className="admin-login-submit disabled:opacity-50" disabled={loading}>
+            {loading ? 'LOGGING IN...' : 'LOGIN'}
           </button>
         </form>
       </div>

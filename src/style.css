@@ -95,6 +95,14 @@ a { color: inherit; text-decoration: none; }
   transform: translateY(-6px);
   transition: opacity 0.18s, transform 0.18s;
 }
+.dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+}
 .nav-dropdown:hover .dropdown-menu,
 .nav-dropdown:focus-within .dropdown-menu {
   opacity: 1;
@@ -988,7 +996,7 @@ body.donate-page{
     color:#555;
     margin-bottom:4px;
 }
-.field input{
+.field input, .field select {
     border:1px solid #4d95d6;
     padding:6px;
     background:transparent;
@@ -1114,7 +1122,7 @@ body.donate-page{
 }
 
 .who-hero {
-  background-image: linear-gradient(rgba(41, 128, 185, 0.85), rgba(41, 128, 185, 0.85)), url('/images/image8.png  ');
+  background-image: linear-gradient(rgba(41, 128, 185, 0.85), rgba(41, 128, 185, 0.85)), url('/images/image8.png');
   background-size: cover;
   background-position: center;
   padding: 120px 20px;

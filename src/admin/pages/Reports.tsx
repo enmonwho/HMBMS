@@ -1,25 +1,126 @@
-import { useState } from 'react';
-import PageHeader from '../PageHeader';
-import { mockGeneratedReports, mockReportStats } from '../mockData';
-import type { ReportType } from '../types';
+import { useEffect, useState } from 'react';
+import PageHeader from '../components/PageHeader';
+import { mockReportStats } from '../../shared/lib/mockData';
+import type { ReportType } from '../../shared/lib/types';
+import { supabase } from '../../shared/lib/supabase';
+import { DownloadSimple } from '@phosphor-icons/react';
 
 const reportTypes: ReportType[] = ['Inventory Summary', 'Beneficiary Logs', 'Processing Yield'];
+
+interface GeneratedReportRecord {
+  id: string;
+  report_name: string;
+  generated_by: string;
+  format: string;
+  download_url: string;
+  created_at: string;
+}
 
 export default function Reports() {
   const [reportType, setReportType] = useState<ReportType | ''>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  const handleGenerate = () => {
-    // No backend yet — once the API exists, this should request a report
-    // for the selected type/date range and add it to the table below.
+  const [reports, setReports] = useState<GeneratedReportRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    async function fetchReports() {
+      try {
+        const { data, error } = await supabase
+          .from('generated_reports')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setReports(data || []);
+      } catch (err) {
+        console.error('Error fetching generated reports:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchReports();
+  }, []);
+
+  const handleGenerate = async () => {
     if (!reportType) {
       alert('Select a report type first.');
       return;
     }
-    alert(
-      `Generate "${reportType}"${startDate || endDate ? ` (${startDate || '…'} to ${endDate || '…'})` : ''} — hook this up once the backend is ready.`
-    );
+    setIsGenerating(true);
+
+    try {
+      let dataToExport: any[] = [];
+
+      // Note: we can filter by startDate and endDate if they are provided, but for this prototype we'll fetch all.
+      let query;
+      if (reportType === 'Inventory Summary') {
+        query = supabase.from('inventory').select('*');
+      } else if (reportType === 'Beneficiary Logs') {
+        query = supabase.from('beneficiaries').select('*');
+      } else if (reportType === 'Processing Yield') {
+        query = supabase.from('batches').select('*');
+      }
+
+      if (query) {
+        if (startDate) query = query.gte('created_at', new Date(startDate).toISOString());
+        if (endDate) query = query.lte('created_at', new Date(endDate + 'T23:59:59').toISOString());
+        const { data, error } = await query;
+        if (error) throw error;
+        dataToExport = data || [];
+      }
+
+      if (dataToExport.length === 0) {
+        alert('No data found for this report type and date range.');
+        setIsGenerating(false);
+        return;
+      }
+
+      // Convert to CSV
+      const headers = Object.keys(dataToExport[0]);
+      const csvRows = [headers.join(',')];
+      for (const row of dataToExport) {
+        const values = headers.map(header => {
+          const val = row[header] !== null ? row[header] : '';
+          return `"${String(val).replace(/"/g, '""')}"`;
+        });
+        csvRows.push(values.join(','));
+      }
+      const csvContent = csvRows.join('\n');
+
+      const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+
+      const newReport = {
+        report_name: `${reportType} ${startDate ? `from ${startDate}` : ''}`,
+        generated_by: 'System Admin',
+        format: 'CSV',
+        download_url: encodedUri,
+      };
+
+      const { data: insertedData, error: insertError } = await supabase.from('generated_reports').insert([newReport]).select();
+      if (insertError) throw insertError;
+
+      if (insertedData) {
+        setReports([insertedData[0], ...reports]);
+      }
+
+      // Trigger automatic download
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${reportType.replace(/\s+/g, '_').toLowerCase()}_report.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate report.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -63,8 +164,7 @@ export default function Reports() {
           <label htmlFor="report-start">Start Date</label>
           <input
             id="report-start"
-            type="text"
-            placeholder="Enter Date here"
+            type="date"
             value={startDate}
             onChange={e => setStartDate(e.target.value)}
           />
@@ -73,14 +173,13 @@ export default function Reports() {
           <label htmlFor="report-end">End Date</label>
           <input
             id="report-end"
-            type="text"
-            placeholder="Enter Date here"
+            type="date"
             value={endDate}
             onChange={e => setEndDate(e.target.value)}
           />
         </div>
-        <button type="button" className="admin-pill-action-btn admin-generate-btn" onClick={handleGenerate}>
-          GENERATE
+        <button type="button" className="admin-pill-action-btn admin-generate-btn disabled:opacity-50" onClick={handleGenerate} disabled={isGenerating}>
+          {isGenerating ? 'GENERATING...' : 'GENERATE'}
         </button>
       </div>
 
@@ -97,24 +196,29 @@ export default function Reports() {
             </tr>
           </thead>
           <tbody>
-            {mockGeneratedReports.length === 0 && (
+            {loading ? (
+              <tr className="admin-table-empty-row">
+                <td colSpan={5}>Loading reports...</td>
+              </tr>
+            ) : reports.length === 0 ? (
               <tr className="admin-table-empty-row">
                 <td colSpan={5}>No reports generated yet.</td>
               </tr>
+            ) : (
+              reports.map(r => (
+                <tr key={r.id}>
+                  <td className="admin-table-name">{r.report_name}</td>
+                  <td>{new Date(r.created_at).toLocaleString()}</td>
+                  <td>{r.generated_by || 'System'}</td>
+                  <td>{r.format}</td>
+                  <td>
+                    <a className="admin-file-link flex items-center gap-1" href={r.download_url || '#'}>
+                      <DownloadSimple size={16} /> Download
+                    </a>
+                  </td>
+                </tr>
+              ))
             )}
-            {mockGeneratedReports.map((r, i) => (
-              <tr key={`${r.reportName}-${r.format}-${i}`}>
-                <td className="admin-table-name">{r.reportName}</td>
-                <td>{r.dateGenerated}</td>
-                <td>{r.generatedBy}</td>
-                <td>{r.format}</td>
-                <td>
-                  <a className="admin-file-link" href={r.downloadUrl ?? '#'}>
-                    ⬇️ Download
-                  </a>
-                </td>
-              </tr>
-            ))}
           </tbody>
         </table>
         </div>

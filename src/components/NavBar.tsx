@@ -44,7 +44,6 @@ function NavBar() {
               className="nav-drop-btn"
               aria-expanded={programsOpen}
               aria-haspopup="true"
-              onClick={() => setProgramsOpen(v => !v)}
               onKeyDown={e => e.key === 'Escape' && setProgramsOpen(false)}
             >
               Programs <span className="caret">▾</span>
@@ -66,7 +65,6 @@ function NavBar() {
               className="nav-drop-btn"
               aria-expanded={donateOpen}
               aria-haspopup="true"
-              onClick={() => setDonateOpen(v => !v)}
               onKeyDown={e => e.key === 'Escape' && setDonateOpen(false)}
             >
               HOW TO DONATE <span className="caret">▾</span>

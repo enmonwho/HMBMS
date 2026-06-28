@@ -1,110 +1,339 @@
-import { useMemo, useState } from 'react';
-import PageHeader from '../PageHeader';
-import StatusPill from '../StatusPill';
-import { mockDonors } from '../mockData';
-import type { Donor } from '../types';
+import { useEffect, useState, useMemo } from 'react';
+import PageHeader from '../components/PageHeader';
+import StatusPill from '../../shared/components/StatusPill';
+import { supabase } from '../../shared/lib/supabase';
+import { Users, UserFocus, UserMinus, CalendarPlus, MagnifyingGlass, IdentificationBadge, ChartBar, X } from '@phosphor-icons/react';
+
+interface DonorRecord {
+  id: string;
+  donor_number: string;
+  status: string;
+  created_at: string;
+  applicant_id: string;
+  applicants: {
+    first_name: string;
+    last_name: string;
+    contact_number: string;
+    email: string;
+    street: string;
+    city: string;
+    province: string;
+    civil_status: string;
+  };
+  milk_collections: {
+    volume_ml: number;
+  }[];
+}
 
 export default function Donors() {
+  const [donors, setDonors] = useState<DonorRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(mockDonors[0]?.id ?? null);
+  const [selectedDonor, setSelectedDonor] = useState<DonorRecord | null>(null);
 
-  const filtered = useMemo(() => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    status: '',
+    contact_number: '',
+    email: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function fetchDonors() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('donors')
+        .select(`
+          id, donor_number, status, created_at, applicant_id,
+          applicants ( id, first_name, last_name, contact_number, email, street, city, province, civil_status ),
+          milk_collections ( volume_ml )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDonors((data as any) || []);
+    } catch (err) {
+      console.error('Error fetching donors:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchDonors();
+  }, []);
+
+  const filteredDonors = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return mockDonors;
-    return mockDonors.filter(d =>
-      d.name.toLowerCase().includes(q) || d.contactNumber.includes(q)
+    if (!q) return donors;
+    return donors.filter(d =>
+      `${d.applicants?.first_name} ${d.applicants?.last_name}`.toLowerCase().includes(q) ||
+      d.donor_number?.toLowerCase().includes(q)
     );
-  }, [search]);
+  }, [donors, search]);
 
-  const selected: Donor | undefined = mockDonors.find(d => d.id === selectedId);
+  const activeCount = donors.filter(d => d.status === 'ACTIVE').length;
+  const inactiveCount = donors.filter(d => d.status === 'INACTIVE').length;
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const newThisMonth = donors.filter(d => {
+    const date = new Date(d.created_at);
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  }).length;
 
   return (
     <>
       <PageHeader title="Donor Directory" />
 
-      <div className="admin-searchbar">
-        <span className="admin-searchbar-icon" aria-hidden="true">🔍</span>
+      <div className="admin-stat-grid gap-6 mb-8">
+        <div className="admin-stat-card tone-blue p-6 flex flex-col justify-center relative overflow-hidden">
+          <Users className="absolute right-[-20px] bottom-[-20px] text-blue-500/10" weight="fill" size={120} />
+          <div className="admin-stat-label text-sm font-semibold tracking-wide uppercase mb-2 flex items-center gap-2">
+            <Users size={18} /> Total Donors
+          </div>
+          <div className="admin-stat-value text-4xl">{donors.length}</div>
+        </div>
+        <div className="admin-stat-card tone-green p-6 flex flex-col justify-center relative overflow-hidden">
+          <UserFocus className="absolute right-[-20px] bottom-[-20px] text-green-500/10" weight="fill" size={120} />
+          <div className="admin-stat-label text-sm font-semibold tracking-wide uppercase mb-2 flex items-center gap-2">
+            <UserFocus size={18} /> Active Donors
+          </div>
+          <div className="admin-stat-value text-4xl">{activeCount}</div>
+        </div>
+        <div className="admin-stat-card tone-red p-6 flex flex-col justify-center relative overflow-hidden">
+          <UserMinus className="absolute right-[-20px] bottom-[-20px] text-red-500/10" weight="fill" size={120} />
+          <div className="admin-stat-label text-sm font-semibold tracking-wide uppercase mb-2 flex items-center gap-2">
+            <UserMinus size={18} /> Inactive Donors
+          </div>
+          <div className="admin-stat-value text-4xl">{inactiveCount}</div>
+        </div>
+        <div className="admin-stat-card tone-amber p-6 flex flex-col justify-center relative overflow-hidden">
+          <CalendarPlus className="absolute right-[-20px] bottom-[-20px] text-orange-500/10" weight="fill" size={120} />
+          <div className="admin-stat-label text-sm font-semibold tracking-wide uppercase mb-2 flex items-center gap-2">
+            <CalendarPlus size={18} /> New This Month
+          </div>
+          <div className="admin-stat-value text-4xl">{newThisMonth}</div>
+        </div>
+      </div>
+
+      <div className="admin-searchbar mb-6">
+        <MagnifyingGlass className="admin-searchbar-icon text-slate-400" size={18} aria-hidden="true" />
         <input
           type="text"
-          placeholder="Search Donor"
+          placeholder="Search by name or ID..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           aria-label="Search donor"
         />
       </div>
 
-      <div className="admin-with-panel">
-        <div className="admin-table-wrap">
-          <div className="admin-table-scroll">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Donation Count</th>
-                <th>Last Donation</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 && (
-                <tr className="admin-table-empty-row">
-                  <td colSpan={5}>No donors found.</td>
+      <div className="admin-with-panel flex gap-6 items-start">
+        <div className="admin-table-wrap flex-1 min-h-[500px]">
+          <div className="admin-table-scroll overflow-x-auto">
+            <table className="admin-table w-full text-left border-collapse">
+              <thead>
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-slate-700">Donor Number</th>
+                  <th className="px-6 py-4 font-semibold text-slate-700">Name</th>
+                  <th className="px-6 py-4 font-semibold text-slate-700">Contact</th>
+                  <th className="px-6 py-4 font-semibold text-slate-700">Registered Date</th>
+                  <th className="px-6 py-4 font-semibold text-slate-700">Status</th>
                 </tr>
-              )}
-              {filtered.map(d => (
-                <tr
-                  key={d.id}
-                  className="is-clickable"
-                  onClick={() => setSelectedId(d.id)}
-                >
-                  <td className="admin-table-name">{d.name}</td>
-                  <td>{d.contactNumber}</td>
-                  <td>{d.donationCount}</td>
-                  <td>{d.lastDonation}</td>
-                  <td>
-                    <StatusPill status={d.status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {loading ? (
+                  <tr className="admin-table-empty-row">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">Loading records...</td>
+                  </tr>
+                ) : filteredDonors.length === 0 ? (
+                  <tr className="admin-table-empty-row">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">No donors found.</td>
+                  </tr>
+                ) : (
+                  filteredDonors.map(d => (
+                    <tr
+                      key={d.id}
+                      className="is-clickable hover:bg-slate-50 transition-colors"
+                      onClick={() => setSelectedDonor(d)}
+                    >
+                      <td className="admin-table-name px-6 py-4 font-medium" style={{ color: 'var(--admin-navy)' }}>
+                        {d.donor_number}
+                      </td>
+                      <td className="admin-table-name px-6 py-4 font-medium text-slate-900">
+                        {d.applicants?.first_name} {d.applicants?.last_name}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{d.applicants?.contact_number}</td>
+                      <td className="px-6 py-4 text-slate-600">{new Date(d.created_at).toLocaleDateString()}</td>
+                      <td className="px-6 py-4">
+                        <StatusPill status={d.status} />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {selected && (
-          <aside className="admin-side-panel" aria-label="Donor profile">
-            <div className="admin-side-panel-head">
-              Donor Profile
+        {selectedDonor && (
+          <aside className="admin-side-panel w-[380px] shrink-0 flex flex-col overflow-hidden" aria-label="Donor profile">
+            <div className="admin-side-panel-head bg-(--admin-navy) text-white px-6 py-5 flex items-center justify-between">
+              <span className="font-bold text-lg tracking-wide">Donor Profile</span>
               <button
                 type="button"
-                className="admin-side-panel-close"
+                className="admin-side-panel-close text-white/80 hover:text-white transition-colors"
                 aria-label="Close donor profile"
-                onClick={() => setSelectedId(null)}
+                onClick={() => setSelectedDonor(null)}
               >
                 ✕
               </button>
             </div>
-            <div className="admin-side-panel-body">
-              <h3>Personal Details</h3>
-              <p>Name: {selected.name}</p>
-              <p>Age: {selected.age}</p>
-              <p>Civil Status: {selected.civilStatus}</p>
-              <p>Occupation: {selected.occupation}</p>
-              <p>Email: {selected.email}</p>
-              <p>Contact Number: {selected.contactNumber}</p>
-              <p>Address: {selected.address}</p>
+            <div className="admin-side-panel-body p-6 flex flex-col gap-6 overflow-y-auto">
+              <div>
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <IdentificationBadge size={18} /> Personal Details
+                </h3>
+                <div className="space-y-3">
+                  <p className="flex flex-col"><span className="text-xs text-slate-500 font-medium">ID</span> <span className="font-medium text-slate-900">{selectedDonor.donor_number}</span></p>
+                  <p className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Name</span> <span className="font-medium text-slate-900">{selectedDonor.applicants?.first_name} {selectedDonor.applicants?.last_name}</span></p>
+                  <p className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Civil Status</span> <span className="text-slate-800">{selectedDonor.applicants?.civil_status}</span></p>
+                  <p className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Email</span> <span className="text-slate-800">{selectedDonor.applicants?.email}</span></p>
+                  <p className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Contact Number</span> <span className="text-slate-800">{selectedDonor.applicants?.contact_number}</span></p>
+                  <p className="flex flex-col"><span className="text-xs text-slate-500 font-medium">Address</span> <span className="text-slate-800 leading-snug">{selectedDonor.applicants?.street}, {selectedDonor.applicants?.city}, {selectedDonor.applicants?.province}</span></p>
+                </div>
+              </div>
 
-              <h3>Emergency Contact</h3>
-              <p>Name: {selected.emergencyContact.name}</p>
-              <p>Contact Number: {selected.emergencyContact.contactNumber}</p>
+              <div className="bg-slate-50 rounded-lg p-5 border border-slate-100">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <ChartBar size={18} /> Donation Metrics
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium mb-1">Total Volume</p>
+                    <p className="font-bold text-lg text-(--admin-navy)">
+                      {selectedDonor.milk_collections?.reduce((acc, curr) => acc + (curr.volume_ml || 0), 0) || 0} mL
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium mb-1">Donation Count</p>
+                    <p className="font-bold text-lg text-(--admin-navy)">
+                      {selectedDonor.milk_collections?.length || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              <h3>Application Form</h3>
-              <a className="admin-file-link" href={selected.applicationFileUrl ?? '#'}>
-                📄 Open File
-              </a>
+              <div className="mt-2 flex gap-3">
+                <button className="admin-pill-action-btn w-full py-3 rounded-lg font-semibold bg-(--admin-navy) text-white hover:bg-(--admin-navy-dark) transition-colors shadow-sm">
+                  Start Collection
+                </button>
+                <button 
+                  onClick={() => {
+                    setEditForm({
+                      status: selectedDonor.status,
+                      contact_number: selectedDonor.applicants?.contact_number || '',
+                      email: selectedDonor.applicants?.email || ''
+                    });
+                    setIsEditModalOpen(true);
+                  }}
+                  className="w-full py-3 rounded-lg font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+                >
+                  Edit Record
+                </button>
+              </div>
             </div>
           </aside>
+        )}
+
+        {/* Edit Modal */}
+        {isEditModalOpen && selectedDonor && (
+          <div className="admin-modal-overlay">
+            <div className="admin-modal-content">
+              <div className="admin-modal-header">
+                <h2 className="admin-modal-title">Edit Donor Record</h2>
+                <button 
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="admin-modal-close"
+                >
+                  <X size={20} weight="bold" />
+                </button>
+              </div>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setIsSubmitting(true);
+                try {
+                  // Update donor status
+                  await supabase.from('donors').update({ status: editForm.status }).eq('id', selectedDonor.id);
+                  // Update applicant details
+                  if (selectedDonor.applicant_id) {
+                    await supabase.from('applicants').update({ 
+                      contact_number: editForm.contact_number,
+                      email: editForm.email
+                    }).eq('id', selectedDonor.applicant_id);
+                  }
+                  
+                  await fetchDonors();
+                  setIsEditModalOpen(false);
+                  setSelectedDonor(null);
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }} className="admin-modal-body space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Status</label>
+                  <select 
+                    className="admin-modal-input"
+                    value={editForm.status}
+                    onChange={e => setEditForm({...editForm, status: e.target.value})}
+                  >
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Contact Number</label>
+                  <input 
+                    type="text"
+                    required
+                    className="admin-modal-input"
+                    value={editForm.contact_number}
+                    onChange={e => setEditForm({...editForm, contact_number: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Email</label>
+                  <input 
+                    type="email"
+                    required
+                    className="admin-modal-input"
+                    value={editForm.email}
+                    onChange={e => setEditForm({...editForm, email: e.target.value})}
+                  />
+                </div>
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="admin-btn-cancel"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-btn-save"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+              </form>
+            </div>
+          </div>
         )}
       </div>
     </>

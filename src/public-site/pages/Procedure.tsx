@@ -1,4 +1,4 @@
-import procedureBg from '../images/image4.png';
+import procedureBg from '../../../images/image4.png';
 
 export default function Procedure() {
   return (

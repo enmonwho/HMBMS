@@ -1,37 +1,129 @@
-import { useMemo, useState } from 'react';
-import PageHeader from '../PageHeader';
-import StatusPill from '../StatusPill';
-import { mockBeneficiaries } from '../mockData';
-import type { Beneficiary } from '../types';
+import { useEffect, useMemo, useState } from 'react';
+import PageHeader from '../components/PageHeader';
+import StatusPill from '../../shared/components/StatusPill';
+import { supabase } from '../../shared/lib/supabase';
+import { MagnifyingGlass, X, FileText, Plus } from '@phosphor-icons/react';
+
+interface BeneficiaryRecord {
+  id: string;
+  hospital_id: string;
+  patient_name: string;
+  parent_name: string;
+  diagnosis: string;
+  required_volume_ml: number;
+  prescription_date: string;
+  status: string;
+  created_at: string;
+}
 
 export default function Beneficiaries() {
+  const [beneficiaries, setBeneficiaries] = useState<BeneficiaryRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(mockBeneficiaries[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    patient_name: '',
+    parent_name: '',
+    hospital_id: '',
+    diagnosis: '',
+    required_volume_ml: '',
+    prescription_date: new Date().toISOString().split('T')[0],
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function fetchBeneficiaries() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('beneficiaries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBeneficiaries((data as BeneficiaryRecord[]) || []);
+    } catch (err) {
+      console.error('Error fetching beneficiaries:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchBeneficiaries();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return mockBeneficiaries;
-    return mockBeneficiaries.filter(b =>
-      b.infantName.toLowerCase().includes(q) ||
-      b.parentGuardian.name.toLowerCase().includes(q)
+    if (!q) return beneficiaries;
+    return beneficiaries.filter(b =>
+      (b.patient_name || '').toLowerCase().includes(q) ||
+      (b.parent_name || '').toLowerCase().includes(q)
     );
-  }, [search]);
+  }, [beneficiaries, search]);
 
-  const selected: Beneficiary | undefined = mockBeneficiaries.find(b => b.id === selectedId);
+  const selected = beneficiaries.find(b => b.id === selectedId);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('beneficiaries')
+        .insert([{
+          patient_name: formData.patient_name,
+          parent_name: formData.parent_name,
+          hospital_id: formData.hospital_id,
+          diagnosis: formData.diagnosis,
+          required_volume_ml: parseInt(formData.required_volume_ml, 10),
+          prescription_date: formData.prescription_date,
+          status: 'ACTIVE'
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setBeneficiaries(prev => [data, ...prev]);
+      setIsModalOpen(false);
+      setFormData({
+        patient_name: '',
+        parent_name: '',
+        hospital_id: '',
+        diagnosis: '',
+        required_volume_ml: '',
+        prescription_date: new Date().toISOString().split('T')[0],
+      });
+    } catch (err) {
+      console.error('Error registering beneficiary:', err);
+      alert('Failed to register beneficiary.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
       <PageHeader title="Beneficiary Directory" />
 
-      <div className="admin-searchbar">
-        <span className="admin-searchbar-icon" aria-hidden="true">🔍</span>
-        <input
-          type="text"
-          placeholder="Search Beneficiary"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          aria-label="Search beneficiary"
-        />
+      <div className="flex items-center justify-between mb-6">
+        <div className="admin-searchbar mb-0 w-full max-w-md">
+          <MagnifyingGlass className="admin-searchbar-icon text-slate-400" size={18} aria-hidden="true" />
+          <input
+            type="text"
+            placeholder="Search Beneficiary"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            aria-label="Search beneficiary"
+          />
+        </div>
+        <button
+          className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <Plus size={18} weight="bold" />
+          Register Beneficiary
+        </button>
       </div>
 
       <div className="admin-with-panel">
@@ -49,22 +141,27 @@ export default function Beneficiaries() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 && (
+              {loading && (
+                <tr className="admin-table-empty-row">
+                  <td colSpan={6}>Loading records...</td>
+                </tr>
+              )}
+              {!loading && filtered.length === 0 && (
                 <tr className="admin-table-empty-row">
                   <td colSpan={6}>No beneficiaries found.</td>
                 </tr>
               )}
-              {filtered.map((b, i) => (
+              {!loading && filtered.map((b, i) => (
                 <tr
                   key={b.id}
                   className="is-clickable"
                   onClick={() => setSelectedId(b.id)}
                 >
                   <td>{i + 1}</td>
-                  <td className="admin-table-name">{b.infantName}</td>
-                  <td>{b.parentGuardian.name}</td>
-                  <td>{b.affiliatedHospital}</td>
-                  <td>{b.dateRegistered}</td>
+                  <td className="admin-table-name">{b.patient_name}</td>
+                  <td>{b.parent_name}</td>
+                  <td>{b.hospital_id}</td>
+                  <td>{new Date(b.created_at).toLocaleDateString()}</td>
                   <td>
                     <StatusPill status={b.status} />
                   </td>
@@ -85,49 +182,157 @@ export default function Beneficiaries() {
                 aria-label="Close baby's profile"
                 onClick={() => setSelectedId(null)}
               >
-                ✕
+                <X size={20} weight="bold" />
               </button>
             </div>
             <div className="admin-side-panel-body">
               <h3>Infant Details</h3>
-              <p>Name: {selected.infantName}</p>
-              <p>Date of Birth: {selected.dateOfBirth}</p>
+              <p>Name: {selected.patient_name}</p>
+              <p>Date of Birth: N/A</p>
               <p>
-                Gestational Age / Weight:{' '}
-                {selected.gestationalAgeWeeks > 0
-                  ? `${selected.gestationalAgeWeeks} Weeks / ${selected.weightKg} kg`
-                  : '—'}
+                Gestational Age / Weight: —
               </p>
-              <p>Sex: {selected.sex}</p>
+              <p>Sex: N/A</p>
               <p>Diagnosis / Reason for Request: {selected.diagnosis}</p>
+              <p>Required Volume: {selected.required_volume_ml} mL</p>
 
               <h3>Parent / Guardian Details</h3>
-              <p>Name: {selected.parentGuardian.name}</p>
-              <p>Relationship: {selected.parentGuardian.relationship}</p>
-              <p>Contact Number: {selected.parentGuardian.contactNumber}</p>
-              <p>Email: {selected.parentGuardian.email}</p>
-              <p>Address: {selected.parentGuardian.address}</p>
+              <p>Name: {selected.parent_name}</p>
+              <p>Relationship: N/A</p>
+              <p>Contact Number: N/A</p>
+              <p>Email: N/A</p>
+              <p>Address: N/A</p>
 
               <h3>Medical Affiliation</h3>
-              <p>Requesting Hospital: {selected.medicalAffiliation.requestingHospital}</p>
-              <p>Ward / Room: {selected.medicalAffiliation.wardRoom}</p>
-              <p>Attending Physician: {selected.medicalAffiliation.attendingPhysician}</p>
+              <p>Requesting Hospital: {selected.hospital_id}</p>
+              <p>Ward / Room: N/A</p>
+              <p>Attending Physician: N/A</p>
 
               <h3>Attached Documents</h3>
               <p>
-                <a className="admin-file-link" href={selected.prescriptionFileUrl ?? '#'}>
-                  📄 Doctor's Prescription / Request Form
+                <a className="admin-file-link flex items-center gap-2" href="#">
+                  <FileText size={18} /> Doctor's Prescription / Request Form (Date: {selected.prescription_date ? new Date(selected.prescription_date).toLocaleDateString() : 'N/A'})
                 </a>
               </p>
               <p>
-                <a className="admin-file-link" href={selected.consentFormUrl ?? '#'}>
-                  📄 Parent/Guardian Consent Form
+                <a className="admin-file-link flex items-center gap-2" href="#">
+                  <FileText size={18} /> Parent/Guardian Consent Form
                 </a>
               </p>
             </div>
           </aside>
         )}
       </div>
+
+      {isModalOpen && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Register Beneficiary</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setIsModalOpen(false)}
+              >
+                <X size={20} weight="bold" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="admin-modal-body space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="space-y-1.5">
+                <label htmlFor="patient_name" className="text-sm font-medium text-slate-700">Infant Name</label>
+                <input
+                  id="patient_name"
+                  required
+                  type="text"
+                  className="admin-modal-input"
+                  value={formData.patient_name}
+                  onChange={e => setFormData({ ...formData, patient_name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="parent_name" className="text-sm font-medium text-slate-700">Parent/Guardian Name</label>
+                <input
+                  id="parent_name"
+                  required
+                  type="text"
+                  className="admin-modal-input"
+                  value={formData.parent_name}
+                  onChange={e => setFormData({ ...formData, parent_name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="hospital_id" className="text-sm font-medium text-slate-700">Requesting Hospital</label>
+                <input
+                  id="hospital_id"
+                  required
+                  type="text"
+                  className="admin-modal-input"
+                  value={formData.hospital_id}
+                  onChange={e => setFormData({ ...formData, hospital_id: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="diagnosis" className="text-sm font-medium text-slate-700">Diagnosis</label>
+                <input
+                  id="diagnosis"
+                  required
+                  type="text"
+                  className="admin-modal-input"
+                  value={formData.diagnosis}
+                  onChange={e => setFormData({ ...formData, diagnosis: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="required_volume_ml" className="text-sm font-medium text-slate-700">Required Vol (mL)</label>
+                  <input
+                    id="required_volume_ml"
+                    required
+                    type="number"
+                    className="admin-modal-input"
+                    value={formData.required_volume_ml}
+                    onChange={e => setFormData({ ...formData, required_volume_ml: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="prescription_date" className="text-sm font-medium text-slate-700">Prescription Date</label>
+                  <input
+                    id="prescription_date"
+                    required
+                    type="date"
+                    className="admin-modal-input"
+                    value={formData.prescription_date}
+                    onChange={e => setFormData({ ...formData, prescription_date: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
+                <button
+                  type="button"
+                  className="admin-btn-cancel"
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-btn-save"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Registering...' : 'Register Beneficiary'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

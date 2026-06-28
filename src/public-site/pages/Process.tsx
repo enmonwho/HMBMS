@@ -1,4 +1,4 @@
-import processBg from '../images/image1.png';
+import processBg from '../../../images/image1.png';
 
 export default function Process() {
   return (

@@ -1,27 +1,29 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Home,
+  House,
   User,
-  FlaskConical,
+  Flask,
   Baby,
   Phone,
-  Settings,
-  BarChart3,
-  ChevronDown,
-} from 'lucide-react';
-import logo from '../assets/mhmb-logo.png';
-import { adminNavGroups } from './navConfig';
-import './admin.css';
+  Gear,
+  ChartBar,
+  CaretDown,
+  type IconProps
+} from '@phosphor-icons/react';
+import logo from '../../assets/mhmb-logo.png';
+import { adminNavGroups } from '../components/navConfig';
+import { supabase } from '../../shared/lib/supabase';
+import '../admin.css';
 
 // Maps each nav group label to its line-icon component, matching the
 // clean outline style from the Canva design (replaces the old emoji icons).
-const GROUP_ICONS: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+const GROUP_ICONS: Record<string, React.FC<IconProps>> = {
   'DONOR MANAGEMENT': User,
-  'PROCESSING': FlaskConical,
+  'PROCESSING': Flask,
   'BENEFICIARIES': Baby,
   'SUPPORT': Phone,
-  'ADMINISTRATION': Settings,
+  'ADMINISTRATION': Gear,
 };
 
 export default function AdminLayout() {
@@ -41,9 +43,8 @@ export default function AdminLayout() {
     setOpenGroups(prev => ({ ...prev, [label]: !prev[label] }));
   };
 
-  const handleLogout = () => {
-    // No auth/session wiring yet — once the backend exists this should
-    // clear the session/token before redirecting.
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/admin/login');
   };
 
@@ -69,7 +70,7 @@ export default function AdminLayout() {
                 `admin-nav-toplink${isActive ? ' active' : ''}`
               }
             >
-              <span className="admin-nav-icon" aria-hidden="true"><Home size={17} strokeWidth={2} /></span>
+              <span className="admin-nav-icon" aria-hidden="true"><House size={17} weight="bold" /></span>
               DASHBOARD
             </NavLink>
 
@@ -88,9 +89,9 @@ export default function AdminLayout() {
                     aria-expanded={isOpen}
                     onClick={() => toggleGroup(group.label)}
                   >
-                    <span className="admin-nav-icon" aria-hidden="true"><GroupIcon size={17} strokeWidth={2} /></span>
+                    <span className="admin-nav-icon" aria-hidden="true"><GroupIcon size={17} weight="bold" /></span>
                     {group.label}
-                    <span className="admin-nav-caret" aria-hidden="true"><ChevronDown size={13} strokeWidth={2.5} /></span>
+                    <span className="admin-nav-caret" aria-hidden="true"><CaretDown size={13} weight="bold" /></span>
                   </button>
                   {isOpen && (
                     <div className="admin-nav-sublist">
@@ -117,7 +118,7 @@ export default function AdminLayout() {
                 `admin-nav-toplink${isActive ? ' active' : ''}`
               }
             >
-              <span className="admin-nav-icon" aria-hidden="true"><BarChart3 size={17} strokeWidth={2} /></span>
+              <span className="admin-nav-icon" aria-hidden="true"><ChartBar size={17} weight="bold" /></span>
               REPORTS
             </NavLink>
             </nav>

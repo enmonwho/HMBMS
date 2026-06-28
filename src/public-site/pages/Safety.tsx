@@ -1,4 +1,4 @@
-import safetyBg from '../images/image2.png';
+import safetyBg from '../../../images/image2.png';
 
 export default function Safety() {
   return (

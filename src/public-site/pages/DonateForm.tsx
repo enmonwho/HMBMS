@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { supabase } from '../../shared/lib/supabase'
 
 // ── Types ──
 type RadioVal = 'yes' | 'no' | null
@@ -161,7 +162,7 @@ export default function DonateForm() {
 
   const handleChange = useCallback(
     (field: keyof Omit<FormState, 'medicalHistory' | 'lifestyleHistory' | 'donatingMilk' | 'consent'>) =>
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm(prev => ({ ...prev, [field]: e.target.value }))
       },
     []
@@ -183,10 +184,54 @@ export default function DonateForm() {
     setForm(prev => ({ ...prev, consent: { ...prev.consent, [key]: !prev.consent[key] } }))
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data Submitted:", form);
-    alert("Thank you! Your donation form has been submitted.");
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('applicants')
+        .insert([{
+          first_name: form.firstName,
+          last_name: form.lastName,
+          age: parseInt(form.age, 10) || 0,
+          civil_status: form.civilStatus,
+          occupation: form.occupation,
+          email: form.email,
+          contact_number: form.contactNumber,
+          street: form.address || 'Unspecified',
+          city: 'Unspecified',
+          province: 'Unspecified',
+          emergency_contact_name: form.emergencyName,
+          emergency_contact_number: form.emergencyContact,
+          medical_history: {
+            ...form.medicalHistory,
+            dateOfDelivery: form.dateOfDelivery,
+            lactationStatus: form.lactationStatus,
+            babyHealthStatus: form.babyHealthStatus,
+            doctorName: form.doctorName,
+          },
+          lifestyle_history: {
+            ...form.lifestyleHistory,
+          },
+          donation_preferences: {
+            ...form.donatingMilk,
+          },
+          status: 'PENDING',
+        }]);
+
+      if (error) throw error;
+
+      alert("Thank you! Your donation form has been submitted.");
+      setForm(initialForm);
+    } catch (error) {
+      console.error('Form submission error:', error);
+      const msg = error instanceof Error ? error.message : JSON.stringify(error);
+      alert(`Failed to submit form: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -228,7 +273,13 @@ export default function DonateForm() {
             </div>
             <div className="field">
               <label htmlFor="civilStatus">Civil Status*</label>
-              <input id="civilStatus" type="text" value={form.civilStatus} onChange={handleChange('civilStatus')} required />
+              <select id="civilStatus" value={form.civilStatus} onChange={handleChange('civilStatus')} required>
+                <option value="" disabled>Select status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+                <option value="Separated">Separated</option>
+              </select>
             </div>
             <div className="field">
               <label htmlFor="occupation">Occupation*</label>
@@ -270,7 +321,12 @@ export default function DonateForm() {
             </div>
             <div className="field">
               <label htmlFor="lactationStatus">Current Lactation Status*</label>
-              <input id="lactationStatus" type="text" value={form.lactationStatus} onChange={handleChange('lactationStatus')} required />
+              <select id="lactationStatus" value={form.lactationStatus} onChange={handleChange('lactationStatus')} required>
+                <option value="" disabled>Select status</option>
+                <option value="Colostrum (Day 1 to 5 postpartum)">Colostrum (Day 1 to 5 postpartum)</option>
+                <option value="Transitional Milk (Day 6 to 14 postpartum)">Transitional Milk (Day 6 to 14 postpartum)</option>
+                <option value="Mature Milk (Day 15+ postpartum)">Mature Milk (Day 15+ postpartum)</option>
+              </select>
             </div>
             <div className="field">
               <label htmlFor="babyHealthStatus">Baby's Current Health Status (if applicable)</label>
@@ -415,8 +471,9 @@ export default function DonateForm() {
               type="submit" 
               className="btn-blue" 
               style={{ width: '100%', maxWidth: '200px', cursor: 'pointer', textAlign: 'center', border: 'none', padding: '12px 0', fontSize: '1.1rem' }}
+              disabled={isSubmitting}
             >
-              SUBMIT
+              {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
             </button>
           </div>
 
