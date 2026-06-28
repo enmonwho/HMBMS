@@ -3,7 +3,8 @@ import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
-import { PencilSimple, X, Warning } from '@phosphor-icons/react';
+import { PencilSimple, X, Warning, Info } from '@phosphor-icons/react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface InventoryItem {
   id: string;
@@ -15,9 +16,19 @@ interface InventoryItem {
   storage_location: string;
 }
 
+interface ChartDataPoint {
+  name: string;
+  Collected: number;
+  Dispensed: number;
+  Discarded: number;
+}
+
 export default function Inventory() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [monthDispensed, setMonthDispensed] = useState(0);
+  const [monthDiscarded, setMonthDiscarded] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -27,24 +38,91 @@ export default function Inventory() {
   const { role } = useAuth();
   const canEdit = !role || ['Administrator', 'Coordinator'].includes(role);
 
-  async function fetchInventory() {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('inventory')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setInventory((data as InventoryItem[]) || []);
-    } catch (err) {
-      console.error('Error fetching inventory:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
+    async function fetchInventory() {
+      try {
+        setLoading(true);
+        const [invRes, dispRes, collRes] = await Promise.all([
+          supabase.from('inventory').select('*').order('created_at', { ascending: false }),
+          supabase.from('dispensing_records').select('volume_ml, date, status').eq('status', 'RELEASED'),
+          supabase.from('milk_collections').select('volume_ml, collection_date')
+        ]);
+
+        if (invRes.error) throw invRes.error;
+        const invData = (invRes.data as InventoryItem[]) || [];
+        setInventory(invData);
+
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        let tMonthDispensed = 0;
+        let tMonthDiscarded = 0;
+
+        if (dispRes.data) {
+          tMonthDispensed = dispRes.data
+            .filter(d => new Date(d.date).getMonth() === currentMonth && new Date(d.date).getFullYear() === currentYear)
+            .reduce((sum, item) => sum + (item.volume_ml || 0), 0);
+        }
+
+        if (invData) {
+          tMonthDiscarded = invData
+            .filter(i => (i.status === 'EXPIRED' || i.status === 'DISCARDED') && new Date(i.created_at).getMonth() === currentMonth && new Date(i.created_at).getFullYear() === currentYear)
+            .reduce((sum, item) => sum + (item.volume_ml || 0), 0);
+        }
+
+        setMonthDispensed(tMonthDispensed);
+        setMonthDiscarded(tMonthDiscarded);
+
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const chartMap = new Map();
+        
+        for (let i = 5; i >= 0; i--) {
+           const d = new Date();
+           d.setMonth(d.getMonth() - i);
+           const key = `${months[d.getMonth()]}`;
+           chartMap.set(key, { name: key, Collected: 0, Dispensed: 0, Discarded: 0 });
+        }
+
+        if (collRes.data) {
+          collRes.data.forEach(c => {
+            const d = new Date(c.collection_date);
+            const key = `${months[d.getMonth()]}`;
+            if (chartMap.has(key)) chartMap.get(key).Collected += (c.volume_ml || 0) / 1000;
+          });
+        }
+
+        if (dispRes.data) {
+          dispRes.data.forEach(d => {
+            const date = new Date(d.date);
+            const key = `${months[date.getMonth()]}`;
+            if (chartMap.has(key)) chartMap.get(key).Dispensed += (d.volume_ml || 0) / 1000;
+          });
+        }
+
+        if (invData) {
+          invData.forEach(i => {
+            if (i.status === 'EXPIRED' || i.status === 'DISCARDED') {
+              const date = new Date(i.created_at);
+              const key = `${months[date.getMonth()]}`;
+              if (chartMap.has(key)) chartMap.get(key).Discarded += (i.volume_ml || 0) / 1000;
+            }
+          });
+        }
+
+        setChartData(Array.from(chartMap.values()).map(item => ({
+          ...item,
+          Collected: parseFloat(item.Collected.toFixed(1)),
+          Dispensed: parseFloat(item.Dispensed.toFixed(1)),
+          Discarded: parseFloat(item.Discarded.toFixed(1)),
+        })));
+
+      } catch (err) {
+        console.error('Error fetching inventory:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchInventory();
   }, []);
 
@@ -77,96 +155,85 @@ export default function Inventory() {
     }
   };
 
-  const available = inventory.filter(i => i.status === 'AVAILABLE').length;
-  const reserved = inventory.filter(i => i.status === 'RESERVED').length;
-  const dispensed = inventory.filter(i => i.status === 'DISPENSED').length;
-  const expired = inventory.filter(i => i.status === 'EXPIRED').length;
+  const availableVolume = inventory.filter(i => i.status === 'AVAILABLE').reduce((sum, item) => sum + (item.volume_ml || 0), 0);
 
   return (
     <>
       <PageHeader title="Inventory" />
 
       <div className="admin-stat-grid mb-6">
-        <div className="admin-stat-card tone-green">
-          <div className="admin-stat-label">Available</div>
-          <div className="admin-stat-value">{available}</div>
-        </div>
-        <div className="admin-stat-card tone-amber">
-          <div className="admin-stat-label">Reserved</div>
-          <div className="admin-stat-value">{reserved}</div>
-        </div>
         <div className="admin-stat-card tone-blue">
-          <div className="admin-stat-label">Dispensed</div>
-          <div className="admin-stat-value">{dispensed}</div>
+          <div className="admin-stat-label">Current stock</div>
+          <div className="admin-stat-value">{(availableVolume / 1000).toFixed(1)} L</div>
+          {availableVolume < 5000 && (
+            <div className="mt-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded inline-flex items-center gap-1">
+              <Warning size={14} weight="bold" /> Low
+            </div>
+          )}
         </div>
+        
+        <div className="admin-stat-card tone-amber">
+          <div className="admin-stat-label">Min. threshold</div>
+          <div className="admin-stat-value">5.0 L</div>
+          <div className="text-slate-500 text-xs font-medium mt-1">Safety floor</div>
+        </div>
+
+        <div className="admin-stat-card tone-green">
+          <div className="admin-stat-label">Dispensed</div>
+          <div className="admin-stat-value">{(monthDispensed / 1000).toFixed(1)} L</div>
+          <div className="text-slate-500 text-xs font-medium mt-1">This month</div>
+        </div>
+
         <div className="admin-stat-card tone-red">
-          <div className="admin-stat-label">Expired</div>
-          <div className="admin-stat-value">{expired}</div>
+          <div className="admin-stat-label">Discarded</div>
+          <div className="admin-stat-value">{(monthDiscarded / 1000).toFixed(1)} L</div>
+          <div className="text-slate-500 text-xs font-medium mt-1">This month</div>
         </div>
       </div>
 
-      {(() => {
-        const availableVolume = inventory.filter(i => i.status === 'AVAILABLE').reduce((sum, item) => sum + (item.volume_ml || 0), 0);
-        const maxVolume = 10000; // 10 Liters visual max
-        const percentage = Math.min((availableVolume / maxVolume) * 100, 100);
-        
-        let meterColorClass = "bg-emerald-500";
-        let statusText = "Normal";
-        let StatusIcon = null;
-        let iconColor = "text-emerald-500";
-
-        if (availableVolume < 2000) {
-          meterColorClass = "bg-red-500";
-          statusText = "Critical Stock";
-          StatusIcon = Warning;
-          iconColor = "text-red-500";
-        } else if (availableVolume < 4000) {
-          meterColorClass = "bg-amber-500";
-          statusText = "Low Stock";
-          StatusIcon = Warning;
-          iconColor = "text-amber-500";
-        }
-
-        return (
-          <div className="admin-panel mb-6">
-            <div className="flex items-center justify-between">
-              <h2>Current Available Volume</h2>
-              <span className={`text-xs px-2.5 py-1 rounded-full text-white font-bold uppercase tracking-wider ${meterColorClass} flex items-center gap-1.5`}>
-                {StatusIcon && <StatusIcon size={14} weight="bold" />}
-                {statusText}
-              </span>
+      <div className="admin-panel mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h2>Monthly inventory volume (liters)</h2>
+          <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-600">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-[#0ea5e9] rounded-[2px]"></div> Collected
             </div>
-            <div className="admin-panel-box p-6">
-              <div className="flex justify-between items-end mb-4">
-                <div>
-                  <p className="text-sm font-bold text-slate-500 mb-1 tracking-wide uppercase">Ready for Dispensing</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className={`text-4xl font-black ${iconColor}`}>
-                      {availableVolume.toLocaleString()}
-                    </span>
-                    <span className="text-lg font-bold text-slate-400">mL</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-slate-400">Target Capacity</span>
-                  <p className="text-lg font-bold text-slate-600">10,000 mL</p>
-                </div>
-              </div>
-              <div className="w-full bg-slate-100 h-6 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
-                <div 
-                  className={`h-full ${meterColorClass} transition-all duration-1000 ease-out`} 
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-              <div className="flex justify-between mt-3 text-xs font-bold text-slate-400">
-                <span>0 mL</span>
-                <span className="relative before:absolute before:left-1/2 before:-top-2 before:w-0.5 before:h-1.5 before:bg-slate-300 before:-translate-x-1/2">2,000 mL (Minimum)</span>
-                <span>10,000 mL</span>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-[#10b981] rounded-[2px]"></div> Dispensed
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-[#f43f5e] rounded-[2px]"></div> Discarded
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-[2px] border-t-2 border-dashed border-[#f59e0b]"></div> Min. threshold
             </div>
           </div>
-        );
-      })()}
+        </div>
+        
+        <div className="admin-panel-box p-6">
+          <div className="h-[320px] mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={v => `${v} L`} />
+                <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#334155'}} />
+                <ReferenceLine y={5} stroke="#f59e0b" strokeDasharray="4 4" strokeWidth={1.5} />
+                <Bar dataKey="Collected" fill="#0ea5e9" radius={[2, 2, 0, 0]} barSize={16} />
+                <Bar dataKey="Dispensed" fill="#10b981" radius={[2, 2, 0, 0]} barSize={16} />
+                <Bar dataKey="Discarded" fill="#f43f5e" radius={[2, 2, 0, 0]} barSize={16} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="bg-amber-50 border-l-[3px] border-amber-500 rounded-r-lg p-4 flex items-start gap-3 mt-6">
+            <Info className="text-amber-600 shrink-0 mt-0.5" size={18} />
+            <p className="text-[0.85rem] text-amber-900 leading-relaxed">
+              Stock levels below <span className="font-bold text-amber-950">5.0 L</span> trigger a low stock alert. Contact active donors or escalate to the Coordinator for urgent collection scheduling.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="admin-table-wrap">
         <div className="admin-table-scroll">
