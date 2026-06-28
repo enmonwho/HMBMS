@@ -3,7 +3,7 @@ import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
-import { PencilSimple, X } from '@phosphor-icons/react';
+import { PencilSimple, X, Warning } from '@phosphor-icons/react';
 
 interface InventoryItem {
   id: string;
@@ -112,42 +112,57 @@ export default function Inventory() {
         
         let meterColorClass = "bg-emerald-500";
         let statusText = "Normal";
+        let StatusIcon = null;
+        let iconColor = "text-emerald-500";
+
         if (availableVolume < 2000) {
           meterColorClass = "bg-red-500";
           statusText = "Critical Stock";
+          StatusIcon = Warning;
+          iconColor = "text-red-500";
         } else if (availableVolume < 4000) {
           meterColorClass = "bg-amber-500";
           statusText = "Low Stock";
+          StatusIcon = Warning;
+          iconColor = "text-amber-500";
         }
 
         return (
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm mb-6">
-            <div className="flex justify-between items-end mb-3">
-              <div>
-                <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                  Total Available Volume
-                  <span className={`text-xs px-2 py-0.5 rounded-full text-white font-bold ${meterColorClass}`}>
-                    {statusText}
-                  </span>
-                </h3>
-                <p className="text-sm text-slate-500">Total milk ready for dispensing</p>
-              </div>
-              <div className="text-right">
-                <span className={`text-3xl font-black ${availableVolume < 2000 ? 'text-red-600' : availableVolume < 4000 ? 'text-amber-500' : 'text-emerald-600'}`}>
-                  {availableVolume} mL
-                </span>
-              </div>
+          <div className="admin-panel mb-6">
+            <div className="flex items-center justify-between">
+              <h2>Current Available Volume</h2>
+              <span className={`text-xs px-2.5 py-1 rounded-full text-white font-bold uppercase tracking-wider ${meterColorClass} flex items-center gap-1.5`}>
+                {StatusIcon && <StatusIcon size={14} weight="bold" />}
+                {statusText}
+              </span>
             </div>
-            <div className="w-full bg-slate-100 h-5 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
-              <div 
-                className={`h-full ${meterColorClass} transition-all duration-1000 ease-out`} 
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-2 text-xs font-bold text-slate-400">
-              <span>0 mL</span>
-              <span>2000 mL (Minimum)</span>
-              <span>10000+ mL</span>
+            <div className="admin-panel-box p-6">
+              <div className="flex justify-between items-end mb-4">
+                <div>
+                  <p className="text-sm font-bold text-slate-500 mb-1 tracking-wide uppercase">Ready for Dispensing</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className={`text-4xl font-black ${iconColor}`}>
+                      {availableVolume.toLocaleString()}
+                    </span>
+                    <span className="text-lg font-bold text-slate-400">mL</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-bold text-slate-400">Target Capacity</span>
+                  <p className="text-lg font-bold text-slate-600">10,000 mL</p>
+                </div>
+              </div>
+              <div className="w-full bg-slate-100 h-6 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
+                <div 
+                  className={`h-full ${meterColorClass} transition-all duration-1000 ease-out`} 
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-3 text-xs font-bold text-slate-400">
+                <span>0 mL</span>
+                <span className="relative before:absolute before:left-1/2 before:-top-2 before:w-0.5 before:h-1.5 before:bg-slate-300 before:-translate-x-1/2">2,000 mL (Minimum)</span>
+                <span>10,000 mL</span>
+              </div>
             </div>
           </div>
         );
