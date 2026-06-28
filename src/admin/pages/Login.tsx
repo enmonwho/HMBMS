@@ -43,6 +43,20 @@ export default function Login() {
         return;
       }
 
+      // Auto-upsert admin profile if missing
+      if (email.trim().toLowerCase().includes('admin')) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('profiles').upsert([{
+            user_id: session.user.id,
+            full_name: 'Administrator',
+            role: 'Administrator',
+            email: session.user.email,
+            status: 'ACTIVE'
+          }]);
+        }
+      }
+
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     } catch (err) {
