@@ -43,6 +43,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               
               <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
