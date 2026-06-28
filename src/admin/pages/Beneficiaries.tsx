@@ -14,6 +14,7 @@ interface BeneficiaryRecord {
   prescription_date: string;
   status: string;
   created_at: string;
+  dispensing_records?: { volume_dispensed_ml: number }[];
 }
 
 export default function Beneficiaries() {
@@ -41,7 +42,7 @@ export default function Beneficiaries() {
       setLoading(true);
       const { data, error } = await supabase
         .from('beneficiaries')
-        .select('*')
+        .select('*, dispensing_records(volume_dispensed_ml)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -67,6 +68,8 @@ export default function Beneficiaries() {
   }, [beneficiaries, search]);
 
   const selected = beneficiaries.find(b => b.id === selectedId);
+  const totalReceived = selected?.dispensing_records?.reduce((acc, curr) => acc + (curr.volume_dispensed_ml || 0), 0) || 0;
+  const isFulfilled = totalReceived >= (selected?.required_volume_ml || 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,7 +200,34 @@ export default function Beneficiaries() {
               </p>
               <p>Sex: N/A</p>
               <p>Diagnosis / Reason for Request: {selected.diagnosis}</p>
-              <p>Required Volume: {selected.required_volume_ml} mL</p>
+              
+              <div className="bg-slate-50 rounded-lg p-4 border border-slate-100 my-4">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">Volume Tracking</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium mb-1">Required Volume</p>
+                    <p className="font-bold text-lg text-slate-800">{selected.required_volume_ml} mL</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium mb-1">Total Received</p>
+                    <p className={`font-bold text-lg ${isFulfilled ? 'text-green-600' : 'text-blue-600'}`}>
+                      {totalReceived} mL
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="w-full bg-slate-200 rounded-full h-2.5 mt-3 overflow-hidden">
+                  <div 
+                    className={`h-2.5 rounded-full ${isFulfilled ? 'bg-green-500' : 'bg-blue-500'}`}
+                    style={{ width: `${Math.min(100, (totalReceived / (selected.required_volume_ml || 1)) * 100)}%` }}
+                  ></div>
+                </div>
+                {isFulfilled && (
+                  <p className="text-xs text-green-600 font-medium mt-2 flex items-center gap-1">
+                    ✓ Required volume fulfilled
+                  </p>
+                )}
+              </div>
 
               <h3>Parent / Guardian Details</h3>
               <p>Name: {selected.parent_name}</p>

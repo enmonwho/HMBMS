@@ -7,24 +7,29 @@ import { MagnifyingGlass, X, Plus } from '@phosphor-icons/react';
 interface DispensingRecord {
   id: string;
   beneficiary_id: string;
+  inventory_id?: string;
   volume_dispensed_ml: number;
   created_at: string;
   dispensed_date: string;
   beneficiaries?: {
     patient_name: string;
   };
+  inventory?: {
+    barcode: string;
+  };
 }
 
 export default function Dispensing() {
   const [records, setRecords] = useState<DispensingRecord[]>([]);
   const [activeBeneficiaries, setActiveBeneficiaries] = useState<any[]>([]);
+  const [availableInventory, setAvailableInventory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     beneficiary_id: '',
-    volume_dispensed_ml: '',
+    inventory_id: '',
     dispensed_date: new Date().toISOString().split('T')[0],
     contact_number: '',
   });
@@ -33,11 +38,12 @@ export default function Dispensing() {
   async function fetchRecords() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+        const { data, error } = await supabase
         .from('dispensing_records')
         .select(`
           *,
-          beneficiaries ( patient_name )
+          beneficiaries ( patient_name ),
+          inventory ( barcode )
         `)
         .order('created_at', { ascending: false });
 
@@ -59,6 +65,14 @@ export default function Dispensing() {
       if (benData) {
         setActiveBeneficiaries(benData);
       }
+
+      const { data: invData } = await supabase
+        .from('inventory')
+        .select('id, barcode, volume_ml')
+        .eq('status', 'AVAILABLE');
+      if (invData) {
+        setAvailableInventory(invData);
+      }
     } catch (err) {
       console.error('Error fetching dispensing records:', err);
     } finally {
@@ -75,7 +89,8 @@ export default function Dispensing() {
     if (!q) return records;
     return records.filter(d => {
       const name = d.beneficiaries?.patient_name?.toLowerCase() || '';
-      return name.includes(q) || d.id.toLowerCase().includes(q) || d.beneficiary_id?.toLowerCase().includes(q);
+      const barcode = d.inventory?.barcode?.toLowerCase() || '';
+      return name.includes(q) || barcode.includes(q) || d.id.toLowerCase().includes(q) || d.beneficiary_id?.toLowerCase().includes(q);
     });
   }, [records, search]);
 
@@ -83,21 +98,40 @@ export default function Dispensing() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const selectedInv = availableInventory.find(i => i.id === formData.inventory_id);
+      if (!selectedInv) {
+        alert("Please select a valid inventory batch.");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const volumeToDispense = selectedInv.volume_ml;
+
       const { data, error } = await supabase
         .from('dispensing_records')
         .insert([{
           beneficiary_id: formData.beneficiary_id,
-          volume_dispensed_ml: parseInt(formData.volume_dispensed_ml, 10),
+          inventory_id: formData.inventory_id,
+          volume_dispensed_ml: volumeToDispense,
           dispensed_date: formData.dispensed_date
         }])
         .select(`
           *,
-          beneficiaries ( patient_name )
+          beneficiaries ( patient_name ),
+          inventory ( barcode )
         `)
         .single();
 
       if (error) throw error;
       
+      // Update inventory status
+      await supabase
+        .from('inventory')
+        .update({ status: 'DISPENSED' })
+        .eq('id', formData.inventory_id);
+        
+      setAvailableInventory(prev => prev.filter(i => i.id !== formData.inventory_id));
+
       // Send SMS notification if a contact number was provided
       if (formData.contact_number) {
         try {
@@ -108,7 +142,7 @@ export default function Dispensing() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               phoneNumber: formData.contact_number,
-              message: `Hello from Makati Human Milk Bank! This is to inform you that the requested ${formData.volume_dispensed_ml}mL of milk for ${name} is now available and ready for dispensing.`
+              message: `Hello from Makati Human Milk Bank! This is to inform you that the requested ${volumeToDispense}mL of milk for ${name} is now available and ready for dispensing.`
             })
           });
         } catch (smsErr) {
@@ -120,7 +154,7 @@ export default function Dispensing() {
       setIsModalOpen(false);
       setFormData({
         beneficiary_id: '',
-        volume_dispensed_ml: '',
+        inventory_id: '',
         dispensed_date: new Date().toISOString().split('T')[0],
         contact_number: '',
       });
@@ -165,6 +199,7 @@ export default function Dispensing() {
               <th>Dispensing ID</th>
               <th>Date</th>
               <th>Beneficiary Name</th>
+              <th>Batch / Barcode</th>
               <th>Volume</th>
               <th>Status</th>
             </tr>
@@ -177,7 +212,7 @@ export default function Dispensing() {
             )}
             {!loading && filtered.length === 0 && (
               <tr className="admin-table-empty-row">
-                <td colSpan={5}>No dispensing records found.</td>
+                <td colSpan={6}>No dispensing records found.</td>
               </tr>
             )}
             {!loading && filtered.map(d => (
@@ -185,6 +220,7 @@ export default function Dispensing() {
                 <td>{d.id.substring(0, 8)}</td>
                 <td>{new Date(d.dispensed_date || d.created_at).toLocaleDateString()}</td>
                 <td className="admin-table-name">{d.beneficiaries?.patient_name || d.beneficiary_id}</td>
+                <td><span className="font-medium text-slate-700">{d.inventory?.barcode || 'N/A'}</span></td>
                 <td>{d.volume_dispensed_ml} ml</td>
                 <td>
                   <StatusPill status={'RELEASED'} />
@@ -231,17 +267,24 @@ export default function Dispensing() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="volume" className="text-sm font-medium text-slate-700">Volume to Dispense (mL)</label>
-                <input
-                  id="volume"
+                <label htmlFor="inventory_id" className="text-sm font-medium text-slate-700">Available Inventory Batch</label>
+                <select
+                  id="inventory_id"
                   required
-                  type="number"
-                  min="1"
                   className="admin-modal-input"
-                  placeholder="e.g. 150"
-                  value={formData.volume_dispensed_ml}
-                  onChange={e => setFormData({ ...formData, volume_dispensed_ml: e.target.value })}
-                />
+                  value={formData.inventory_id}
+                  onChange={e => setFormData({ ...formData, inventory_id: e.target.value })}
+                >
+                  <option value="" disabled>-- Select a bottle/batch --</option>
+                  {availableInventory.map(inv => (
+                    <option key={inv.id} value={inv.id}>
+                      {inv.barcode} ({inv.volume_ml} mL)
+                    </option>
+                  ))}
+                </select>
+                {availableInventory.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-1">No milk currently available in inventory.</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -282,7 +325,7 @@ export default function Dispensing() {
                 <button
                   type="submit"
                   className="admin-btn-save"
-                  disabled={isSubmitting || activeBeneficiaries.length === 0}
+                  disabled={isSubmitting || activeBeneficiaries.length === 0 || availableInventory.length === 0}
                 >
                   {isSubmitting ? 'Dispensing...' : 'Confirm Dispensing'}
                 </button>
