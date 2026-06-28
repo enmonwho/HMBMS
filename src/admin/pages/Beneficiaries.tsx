@@ -395,14 +395,27 @@ export default function Beneficiaries() {
 
               <div className="space-y-1.5">
                 <label htmlFor="diagnosis" className="text-sm font-medium text-slate-700">Diagnosis</label>
-                <input
+                <select
                   id="diagnosis"
                   required
-                  type="text"
                   className="admin-modal-input"
                   value={formData.diagnosis}
                   onChange={e => setFormData({ ...formData, diagnosis: e.target.value })}
-                />
+                >
+                  <option value="" disabled>-- Select diagnosis/reason --</option>
+                  <option value="Prematurity">Prematurity</option>
+                  <option value="Very Low Birth Weight (VLBW)">Very Low Birth Weight (VLBW)</option>
+                  <option value="Extremely Low Birth Weight (ELBW)">Extremely Low Birth Weight (ELBW)</option>
+                  <option value="Necrotizing Enterocolitis (NEC)">Necrotizing Enterocolitis (NEC)</option>
+                  <option value="Short Bowel Syndrome (SBS)">Short Bowel Syndrome (SBS)</option>
+                  <option value="Malabsorption">Malabsorption</option>
+                  <option value="Gastroschisis / Omphalocele">Gastroschisis / Omphalocele</option>
+                  <option value="Congenital Heart Disease">Congenital Heart Disease</option>
+                  <option value="Inborn Errors of Metabolism">Inborn Errors of Metabolism</option>
+                  <option value="Maternal Lactation Failure">Maternal Lactation Failure</option>
+                  <option value="Maternal Illness/Medication">Maternal Illness/Medication</option>
+                  <option value="Adoption / Surrogacy">Adoption / Surrogacy</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
