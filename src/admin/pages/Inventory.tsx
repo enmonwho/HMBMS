@@ -229,12 +229,14 @@ export default function Inventory() {
             </ResponsiveContainer>
           </div>
           
-          <div className="bg-amber-50 border-l-[3px] border-amber-500 rounded-r-md p-3.5 flex items-start gap-2.5 mt-4">
-            <Info className="text-amber-600 shrink-0 mt-0.5" size={18} />
-            <p className="text-[0.85rem] text-amber-900 leading-relaxed">
-              Stock levels below <span className="font-bold text-amber-950">5.0 L</span> trigger a low stock alert. Contact active donors or escalate to the Coordinator for urgent collection scheduling.
+          {availableVolume < 5000 && (
+          <div className="mt-4 bg-orange-50 border-l-[3px] border-orange-500 rounded-r p-2.5 flex items-start gap-2 shadow-sm">
+            <Info className="text-orange-600 shrink-0 mt-0.5" size={16} weight="fill" />
+            <p className="text-sm font-medium text-orange-900 leading-snug">
+              Stock levels below <strong className="font-bold text-orange-950">5.0 L</strong> trigger a low stock alert. Contact active donors or escalate to the Coordinator for urgent collection scheduling.
             </p>
           </div>
+        )}
         </div>
       </div>
 
