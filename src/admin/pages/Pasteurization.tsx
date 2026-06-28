@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import { Plus, X, PencilSimple } from '@phosphor-icons/react';
 
 interface BatchRecord {
@@ -15,6 +16,9 @@ interface BatchRecord {
 }
 
 export default function Pasteurization() {
+  const { role } = useAuth();
+  const canEdit = role !== 'Nurse';
+
   const [batches, setBatches] = useState<BatchRecord[]>([]);
   const [passedCollections, setPassedCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,15 +185,17 @@ export default function Pasteurization() {
     <>
       <PageHeader title="Batch Records" />
 
-      <div className="flex items-center justify-end mb-6">
-        <button
-          className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <Plus size={18} weight="bold" />
-          Create Batch
-        </button>
-      </div>
+      {canEdit && (
+        <div className="flex items-center justify-end mb-6">
+          <button
+            className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus size={18} weight="bold" />
+            Create Batch
+          </button>
+        </div>
+      )}
 
       <div className="admin-table-wrap">
         <div className="admin-table-scroll">
@@ -202,7 +208,7 @@ export default function Pasteurization() {
               <th>Temperature</th>
               <th>Duration</th>
               <th>Status</th>
-              <th>Action</th>
+              {canEdit && <th>Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -225,16 +231,18 @@ export default function Pasteurization() {
                   <td>
                     <StatusPill status={b.status} />
                   </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="admin-edit-btn"
-                      aria-label={`Update batch ${b.batch_id}`}
-                      onClick={() => openUpdateModal(b)}
-                    >
-                      <PencilSimple size={16} /> Update
-                    </button>
-                  </td>
+                  {canEdit && (
+                    <td>
+                      <button
+                        type="button"
+                        className="admin-edit-btn"
+                        aria-label={`Update batch ${b.batch_id}`}
+                        onClick={() => openUpdateModal(b)}
+                      >
+                        <PencilSimple size={16} /> Update
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             )}

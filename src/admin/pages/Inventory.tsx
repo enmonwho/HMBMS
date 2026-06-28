@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import { PencilSimple, X } from '@phosphor-icons/react';
 
 interface InventoryItem {
@@ -22,6 +23,9 @@ export default function Inventory() {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { role } = useAuth();
+  const canEdit = !role || ['Administrator', 'Coordinator'].includes(role);
 
   async function fetchInventory() {
     try {
@@ -117,12 +121,12 @@ export default function Inventory() {
             <tbody>
               {loading && (
                 <tr className="admin-table-empty-row">
-                  <td colSpan={5}>Loading inventory...</td>
+                  <td colSpan={6}>Loading inventory...</td>
                 </tr>
               )}
               {!loading && inventory.length === 0 && (
                 <tr className="admin-table-empty-row">
-                  <td colSpan={5}>No inventory items yet.</td>
+                  <td colSpan={6}>No inventory items yet.</td>
                 </tr>
               )}
               {!loading && inventory.map(item => (
@@ -135,13 +139,15 @@ export default function Inventory() {
                     <StatusPill status={item.status} />
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="admin-edit-btn"
-                      onClick={() => openModal(item)}
-                    >
-                      <PencilSimple size={16} /> Update
-                    </button>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        className="admin-edit-btn"
+                        onClick={() => openModal(item)}
+                      >
+                        <PencilSimple size={16} /> Update
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import { FileText, Plus, X } from '@phosphor-icons/react';
 
 interface LabTestRecord {
@@ -16,6 +17,9 @@ export default function Laboratory() {
   const [tests, setTests] = useState<LabTestRecord[]>([]);
   const [pendingCollections, setPendingCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { role } = useAuth();
+  const canEdit = !role || ['Administrator', 'Medical Technologist'].includes(role);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -111,15 +115,17 @@ export default function Laboratory() {
     <>
       <PageHeader title="Laboratory Tests" />
 
-      <div className="flex items-center justify-end" style={{ marginBottom: '32px', marginTop: '16px' }}>
-        <button
-          className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
-          onClick={handleRecordTest}
-        >
-          <Plus size={18} weight="bold" />
-          Record Test Result
-        </button>
-      </div>
+      {canEdit && (
+        <div className="flex items-center justify-end" style={{ marginBottom: '32px', marginTop: '16px' }}>
+          <button
+            className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
+            onClick={handleRecordTest}
+          >
+            <Plus size={18} weight="bold" />
+            Record Test Result
+          </button>
+        </div>
+      )}
 
       <div className="admin-table-wrap">
         <div className="admin-table-scroll">

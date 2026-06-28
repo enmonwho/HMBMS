@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import { Users, UserFocus, UserMinus, CalendarPlus, MagnifyingGlass, IdentificationBadge, ChartBar, X } from '@phosphor-icons/react';
 
 interface DonorRecord {
@@ -40,6 +41,8 @@ export default function Donors() {
     email: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { role } = useAuth();
+  const canEdit = role !== 'Medical Technologist';
 
   async function fetchDonors() {
     try {
@@ -234,19 +237,21 @@ export default function Donors() {
                 >
                   Start Collection
                 </button>
-                <button 
-                  onClick={() => {
-                    setEditForm({
-                      status: selectedDonor.status,
-                      contact_number: selectedDonor.applicants?.contact_number || '',
-                      email: selectedDonor.applicants?.email || ''
-                    });
-                    setIsEditModalOpen(true);
-                  }}
-                  className="w-full py-3 rounded-lg font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
-                >
-                  Edit Record
-                </button>
+                {canEdit && (
+                  <button 
+                    onClick={() => {
+                      setEditForm({
+                        status: selectedDonor.status,
+                        contact_number: selectedDonor.applicants?.contact_number || '',
+                        email: selectedDonor.applicants?.email || ''
+                      });
+                      setIsEditModalOpen(true);
+                    }}
+                    className="w-full py-3 rounded-lg font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+                  >
+                    Edit Record
+                  </button>
+                )}
               </div>
             </div>
           </aside>

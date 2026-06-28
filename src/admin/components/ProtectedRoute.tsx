@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import type { Session } from '@supabase/supabase-js';
-import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 
-export default function ProtectedRoute() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+interface ProtectedRouteProps {
+  allowedRoles?: string[];
+}
+
+export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const { session, role, loading } = useAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   if (loading) {
     return (
@@ -36,6 +22,11 @@ export default function ProtectedRoute() {
 
   if (!session) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  }
+
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    // If user is logged in but doesn't have the required role, send them to dashboard
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <Outlet />;

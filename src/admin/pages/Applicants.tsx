@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import { 
   Users, HourglassHigh, CheckCircle, XCircle, 
   MagnifyingGlass, UserPlus, FileText, Check, X,
@@ -82,6 +83,8 @@ export default function Applicants() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingSMS, setIsSendingSMS] = useState(false);
+  const { role } = useAuth();
+  const canEdit = role !== 'Medical Technologist';
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -464,41 +467,45 @@ export default function Applicants() {
                   <StatusPill status={selectedApplicant.status} />
                 </div>
                 
-                {selectedApplicant.status === 'PENDING' && (
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => handleUpdateStatus(selectedApplicant.id, 'APPROVED')}
-                      className="flex-1 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm"
-                    >
-                      <Check size={18} weight="bold" /> Approve
-                    </button>
-                    <button 
-                      onClick={() => handleUpdateStatus(selectedApplicant.id, 'REJECTED')}
-                      className="flex-1 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 transition-colors shadow-sm"
-                    >
-                      <X size={18} weight="bold" /> Reject
-                    </button>
-                  </div>
-                )}
-                
-                {selectedApplicant.status !== 'PENDING' && (
-                  <button 
-                    onClick={() => handleUpdateStatus(selectedApplicant.id, 'PENDING')}
-                    className="w-full py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
-                  >
-                    Revert to Pending
-                  </button>
-                )}
+                {canEdit && (
+                  <>
+                    {selectedApplicant.status === 'PENDING' && (
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => handleUpdateStatus(selectedApplicant.id, 'APPROVED')}
+                          className="flex-1 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm"
+                        >
+                          <Check size={18} weight="bold" /> Approve
+                        </button>
+                        <button 
+                          onClick={() => handleUpdateStatus(selectedApplicant.id, 'REJECTED')}
+                          className="flex-1 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 transition-colors shadow-sm"
+                        >
+                          <X size={18} weight="bold" /> Reject
+                        </button>
+                      </div>
+                    )}
+                    
+                    {selectedApplicant.status !== 'PENDING' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(selectedApplicant.id, 'PENDING')}
+                        className="w-full py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+                      >
+                        Revert to Pending
+                      </button>
+                    )}
 
-                {!!selectedApplicant.donation_preferences?.preferredDateTime && !!selectedApplicant.contact_number && (
-                  <button
-                    onClick={handleSendReminder}
-                    disabled={isSendingSMS}
-                    className="w-full mt-2 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
-                  >
-                    <Phone size={18} weight="bold" />
-                    {isSendingSMS ? 'Sending SMS...' : 'Send SMS Reminder'}
-                  </button>
+                    {!!selectedApplicant.donation_preferences?.preferredDateTime && !!selectedApplicant.contact_number && (
+                      <button
+                        onClick={handleSendReminder}
+                        disabled={isSendingSMS}
+                        className="w-full mt-2 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+                      >
+                        <Phone size={18} weight="bold" />
+                        {isSendingSMS ? 'Sending SMS...' : 'Send SMS Reminder'}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

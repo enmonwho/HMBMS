@@ -3,6 +3,7 @@ import PageHeader from '../components/PageHeader';
 import { mockReportStats } from '../../shared/lib/mockData';
 import type { ReportType } from '../../shared/lib/types';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import { DownloadSimple } from '@phosphor-icons/react';
 
 const reportTypes: ReportType[] = ['Inventory Summary', 'Beneficiary Logs', 'Processing Yield'];
@@ -24,6 +25,9 @@ export default function Reports() {
   const [reports, setReports] = useState<GeneratedReportRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const { role } = useAuth();
+  const canEdit = role !== 'Medical Technologist';
 
   useEffect(() => {
     async function fetchReports() {
@@ -146,42 +150,44 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="admin-report-controls">
-        <div className="admin-report-field">
-          <label htmlFor="report-type">Select Report Type</label>
-          <select
-            id="report-type"
-            value={reportType}
-            onChange={e => setReportType(e.target.value as ReportType)}
-          >
-            <option value="" disabled>Select Report Type</option>
-            {reportTypes.map(rt => (
-              <option key={rt} value={rt}>{rt}</option>
-            ))}
-          </select>
+      {canEdit && (
+        <div className="admin-report-controls">
+          <div className="admin-report-field">
+            <label htmlFor="report-type">Select Report Type</label>
+            <select
+              id="report-type"
+              value={reportType}
+              onChange={e => setReportType(e.target.value as ReportType)}
+            >
+              <option value="" disabled>Select Report Type</option>
+              {reportTypes.map(rt => (
+                <option key={rt} value={rt}>{rt}</option>
+              ))}
+            </select>
+          </div>
+          <div className="admin-report-field">
+            <label htmlFor="report-start">Start Date</label>
+            <input
+              id="report-start"
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="admin-report-field">
+            <label htmlFor="report-end">End Date</label>
+            <input
+              id="report-end"
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+            />
+          </div>
+          <button type="button" className="admin-pill-action-btn admin-generate-btn disabled:opacity-50" onClick={handleGenerate} disabled={isGenerating}>
+            {isGenerating ? 'GENERATING...' : 'GENERATE'}
+          </button>
         </div>
-        <div className="admin-report-field">
-          <label htmlFor="report-start">Start Date</label>
-          <input
-            id="report-start"
-            type="date"
-            value={startDate}
-            onChange={e => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className="admin-report-field">
-          <label htmlFor="report-end">End Date</label>
-          <input
-            id="report-end"
-            type="date"
-            value={endDate}
-            onChange={e => setEndDate(e.target.value)}
-          />
-        </div>
-        <button type="button" className="admin-pill-action-btn admin-generate-btn disabled:opacity-50" onClick={handleGenerate} disabled={isGenerating}>
-          {isGenerating ? 'GENERATING...' : 'GENERATE'}
-        </button>
-      </div>
+      )}
 
       <div className="admin-table-wrap">
         <div className="admin-table-scroll">

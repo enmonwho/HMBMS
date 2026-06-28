@@ -27,9 +27,12 @@ import Reports from './admin/pages/Reports';
 import UserManagement from './admin/pages/UserManagement';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 
+import { AuthProvider } from './shared/lib/AuthContext';
+
 function App() {
   return (
-    <Routes>
+    <AuthProvider>
+      <Routes>
       {/* Public site */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
@@ -49,20 +52,46 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="donor-management/applicants" element={<Applicants />} />
-          <Route path="donor-management/donors" element={<Donors />} />
-          <Route path="donor-management/collections" element={<Collections />} />
-          <Route path="processing/laboratory" element={<Laboratory />} />
-          <Route path="processing/pasteurization" element={<Pasteurization />} />
-          <Route path="processing/inventory" element={<Inventory />} />
-          <Route path="beneficiaries/list" element={<Beneficiaries />} />
-          <Route path="beneficiaries/dispensing" element={<Dispensing />} />
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
+            <Route path="donor-management/applicants" element={<Applicants />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife', 'Medical Technologist']} />}>
+            <Route path="donor-management/donors" element={<Donors />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife']} />}>
+            <Route path="donor-management/collections" element={<Collections />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
+            <Route path="processing/laboratory" element={<Laboratory />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist']} />}>
+            <Route path="processing/pasteurization" element={<Pasteurization />} />
+            <Route path="processing/inventory" element={<Inventory />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife']} />}>
+            <Route path="beneficiaries/list" element={<Beneficiaries />} />
+            <Route path="beneficiaries/dispensing" element={<Dispensing />} />
+          </Route>
+          
           <Route path="support/hotline" element={<Hotline />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="administration/user-management" element={<UserManagement />} />
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Medical Technologist']} />}>
+            <Route path="reports" element={<Reports />} />
+          </Route>
+          
+          <Route element={<ProtectedRoute allowedRoles={['Administrator']} />}>
+            <Route path="administration/user-management" element={<UserManagement />} />
+          </Route>
         </Route>
       </Route>
-    </Routes>
+      </Routes>
+    </AuthProvider>
   );
 }
 

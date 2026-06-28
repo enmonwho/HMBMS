@@ -14,6 +14,7 @@ import {
 import logo from '../../assets/mhmb-logo.png';
 import { adminNavGroups } from '../components/navConfig';
 import { supabase } from '../../shared/lib/supabase';
+import { useAuth } from '../../shared/lib/AuthContext';
 import '../admin.css';
 
 // Maps each nav group label to its line-icon component, matching the
@@ -30,6 +31,8 @@ export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { role } = useAuth();
+  
   // Expand whichever group contains the current route by default.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -47,6 +50,15 @@ export default function AdminLayout() {
     await supabase.auth.signOut();
     navigate('/admin/login');
   };
+
+  // Filter groups and children based on user role
+  const visibleGroups = adminNavGroups
+    .filter(group => !role || group.allowedRoles.includes(role))
+    .map(group => ({
+      ...group,
+      children: group.children.filter(child => !role || child.allowedRoles.includes(role))
+    }))
+    .filter(group => group.children.length > 0);
 
   return (
     <div className="admin-root">
@@ -74,7 +86,7 @@ export default function AdminLayout() {
               DASHBOARD
             </NavLink>
 
-            {adminNavGroups.map(group => {
+            {visibleGroups.map(group => {
               const isOpen = !!openGroups[group.label];
               const hasActive = location.pathname.startsWith(group.basePath);
               const GroupIcon = GROUP_ICONS[group.label] ?? User;
@@ -112,7 +124,8 @@ export default function AdminLayout() {
               );
             })}
 
-            <NavLink
+            {(!role || ['Administrator', 'Coordinator', 'Medical Technologist'].includes(role)) && (
+              <NavLink
               to="/admin/reports"
               className={({ isActive }) =>
                 `admin-nav-toplink${isActive ? ' active' : ''}`
@@ -121,6 +134,7 @@ export default function AdminLayout() {
               <span className="admin-nav-icon" aria-hidden="true"><ChartBar size={17} weight="bold" /></span>
               REPORTS
             </NavLink>
+            )}
             </nav>
 
             <div className="admin-sidebar-footer">
