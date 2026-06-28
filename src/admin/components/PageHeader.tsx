@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../shared/lib/supabase';
-import { Bell, Warning, Clock } from '@phosphor-icons/react';
 
 function initials(name: string) {
   return name
@@ -18,10 +17,6 @@ interface PageHeaderProps {
 
 export default function PageHeader({ title }: PageHeaderProps) {
   const [user, setUser] = useState({ name: 'Loading...', role: 'Loading...' });
-  const [totalVolume, setTotalVolume] = useState(0);
-  const [expiringBatches, setExpiringBatches] = useState<any[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchUser() {
@@ -47,109 +42,17 @@ export default function PageHeader({ title }: PageHeaderProps) {
       }
     }
     
-    async function fetchAlerts() {
-      try {
-        const { data: invList } = await supabase.from('inventory').select('id, barcode, volume_ml, expiry_date').eq('status', 'AVAILABLE');
-        if (invList) {
-          const totalVol = invList.reduce((sum, item) => sum + (item.volume_ml || 0), 0);
-          setTotalVolume(totalVol);
-          
-          const now = new Date();
-          const sevenDaysFromNow = new Date();
-          sevenDaysFromNow.setDate(now.getDate() + 7);
-          
-          const expiring = invList.filter(item => {
-             if (!item.expiry_date) return false;
-             const expDate = new Date(item.expiry_date);
-             return expDate <= sevenDaysFromNow;
-          });
-          setExpiringBatches(expiring);
-        }
-      } catch (err) {
-        console.error('Error fetching inventory alerts:', err);
-      }
-    }
-
     fetchUser();
-    fetchAlerts();
   }, []);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [notifRef]);
-
-  const hasLowStock = totalVolume < 2000;
-  const hasExpiring = expiringBatches.length > 0;
-  const alertCount = (hasLowStock ? 1 : 0) + (hasExpiring ? 1 : 0);
-
   return (
-    <div className="admin-page-head flex items-center justify-between relative z-[100]">
+    <div className="admin-page-head">
       <h1>{title}</h1>
-      <div className="flex items-center gap-6">
-        
-        <div className="relative" ref={notifRef}>
-          <button 
-            className="p-2 text-slate-200 hover:text-white hover:bg-white/10 rounded-full relative transition-colors"
-            onClick={() => setShowNotifications(!showNotifications)}
-          >
-            <Bell size={24} />
-            {alertCount > 0 && (
-              <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 border-2 border-[var(--admin-navy)] rounded-full"></span>
-            )}
-          </button>
-
-          {showNotifications && (
-            <div className="absolute right-0 mt-3 w-[400px] bg-[#f6f1e7] border border-[var(--admin-border)] rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.15)] overflow-hidden">
-              <div className="bg-[var(--admin-navy)] text-white px-5 py-4 flex justify-between items-center rounded-t-xl">
-                <span className="text-[1.15rem] font-bold tracking-wide">Notifications</span>
-                {alertCount > 0 && <span className="text-xs bg-white text-[var(--admin-navy)] font-bold px-2 py-0.5 rounded-full">{alertCount}</span>}
-              </div>
-              <div className="max-h-[400px] overflow-y-auto">
-                {alertCount === 0 ? (
-                  <div className="p-6 text-center text-sm text-slate-500 font-medium">No new notifications</div>
-                ) : (
-                  <div className="flex flex-col">
-                    {hasLowStock && (
-                      <div className="p-5 border-b border-black/5 flex items-start gap-4 bg-white/50">
-                        <div className="text-red-500 mt-0.5 shrink-0 bg-red-50 p-2 rounded-full">
-                          <Warning weight="fill" size={24} />
-                        </div>
-                        <div>
-                          <p className="text-[0.95rem] font-bold text-slate-800 mb-1">Low Stock Alert!</p>
-                          <p className="text-[0.85rem] text-slate-600 leading-snug">Total available milk is dangerously low ({totalVolume} mL). Recommended minimum is 2,000 mL.</p>
-                        </div>
-                      </div>
-                    )}
-                    {hasExpiring && (
-                      <div className="p-5 border-b border-black/5 flex items-start gap-4 bg-white/50">
-                        <div className="text-amber-500 mt-0.5 shrink-0 bg-amber-50 p-2 rounded-full">
-                          <Clock weight="fill" size={24} />
-                        </div>
-                        <div>
-                          <p className="text-[0.95rem] font-bold text-slate-800 mb-1">Batches Expiring Soon</p>
-                          <p className="text-[0.85rem] text-slate-600 leading-snug">You have {expiringBatches.length} batch(es) expiring within the next 7 days. Prioritize dispensing these!</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="admin-userchip">
-          <div className="admin-userchip-avatar">{initials(user.name)}</div>
-          <div>
-            <div className="admin-userchip-name">{user.name}</div>
-            <div className="admin-userchip-role">{user.role}</div>
-          </div>
+      <div className="admin-userchip">
+        <div className="admin-userchip-avatar">{initials(user.name)}</div>
+        <div>
+          <div className="admin-userchip-name">{user.name}</div>
+          <div className="admin-userchip-role">{user.role}</div>
         </div>
       </div>
     </div>

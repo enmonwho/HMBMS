@@ -86,7 +86,7 @@ export default function Inventory() {
     <>
       <PageHeader title="Inventory" />
 
-      <div className="admin-stat-grid">
+      <div className="admin-stat-grid mb-6">
         <div className="admin-stat-card tone-green">
           <div className="admin-stat-label">Available</div>
           <div className="admin-stat-value">{available}</div>
@@ -104,6 +104,54 @@ export default function Inventory() {
           <div className="admin-stat-value">{expired}</div>
         </div>
       </div>
+
+      {(() => {
+        const availableVolume = inventory.filter(i => i.status === 'AVAILABLE').reduce((sum, item) => sum + (item.volume_ml || 0), 0);
+        const maxVolume = 10000; // 10 Liters visual max
+        const percentage = Math.min((availableVolume / maxVolume) * 100, 100);
+        
+        let meterColorClass = "bg-emerald-500";
+        let statusText = "Normal";
+        if (availableVolume < 2000) {
+          meterColorClass = "bg-red-500";
+          statusText = "Critical Stock";
+        } else if (availableVolume < 4000) {
+          meterColorClass = "bg-amber-500";
+          statusText = "Low Stock";
+        }
+
+        return (
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm mb-6">
+            <div className="flex justify-between items-end mb-3">
+              <div>
+                <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                  Total Available Volume
+                  <span className={`text-xs px-2 py-0.5 rounded-full text-white font-bold ${meterColorClass}`}>
+                    {statusText}
+                  </span>
+                </h3>
+                <p className="text-sm text-slate-500">Total milk ready for dispensing</p>
+              </div>
+              <div className="text-right">
+                <span className={`text-3xl font-black ${availableVolume < 2000 ? 'text-red-600' : availableVolume < 4000 ? 'text-amber-500' : 'text-emerald-600'}`}>
+                  {availableVolume} mL
+                </span>
+              </div>
+            </div>
+            <div className="w-full bg-slate-100 h-5 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
+              <div 
+                className={`h-full ${meterColorClass} transition-all duration-1000 ease-out`} 
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-2 text-xs font-bold text-slate-400">
+              <span>0 mL</span>
+              <span>2000 mL (Minimum)</span>
+              <span>10000+ mL</span>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="admin-table-wrap">
         <div className="admin-table-scroll">
