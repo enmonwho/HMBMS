@@ -265,7 +265,13 @@ export default function Inventory() {
                   <td colSpan={6}>No inventory items yet.</td>
                 </tr>
               )}
-              {!loading && inventory.map(item => (
+              {!loading && [...inventory].sort((a, b) => {
+                const statusOrder: Record<string, number> = { AVAILABLE: 0, DISPENSED: 1, EXPIRED: 2, DISCARDED: 3 };
+                const orderA = statusOrder[a.status] ?? 99;
+                const orderB = statusOrder[b.status] ?? 99;
+                if (orderA !== orderB) return orderA - orderB;
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+              }).map(item => (
                 <tr key={item.id}>
                   <td>{item.barcode || item.id}</td>
                   <td>{item.volume_ml} mL</td>
@@ -320,7 +326,6 @@ export default function Inventory() {
                   onChange={e => setNewStatus(e.target.value)}
                 >
                   <option value="AVAILABLE">Available</option>
-                  <option value="RESERVED">Reserved</option>
                   <option value="DISPENSED">Dispensed</option>
                   <option value="EXPIRED">Expired</option>
                   <option value="DISCARDED">Discarded</option>
