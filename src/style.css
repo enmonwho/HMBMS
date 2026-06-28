@@ -4,8 +4,12 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;600&display=swap');
 
-/* ── RESET ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── RESET ──
+   Scoped to exclude .admin-root so it doesn't fight Tailwind's
+   utility classes (margin/padding) used in the admin panel. */
+*:not(.admin-root, .admin-root *),
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --blue:         #4497c1;
