@@ -1,10 +1,8 @@
-import procedureBg from '../../../images/image4.png';
-
 export default function Procedure() {
   return (
     <div 
       className="donate-info-wrapper" 
-      style={{ backgroundImage: `url(${procedureBg})` }}
+      style={{ backgroundImage: `url(/images/image4.png)` }}
     >
       <div className="donate-info-card">
         <div className="donate-watermark"></div>

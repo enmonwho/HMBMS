@@ -1,10 +1,8 @@
-import processBg from '../../../images/image1.png';
-
 export default function Process() {
   return (
     <div 
       className="donate-info-wrapper" 
-      style={{ backgroundImage: `url(${processBg})` }}
+      style={{ backgroundImage: `url(/images/image1.png)` }}
     >
       <div className="donate-info-card">
         <div className="donate-watermark"></div>

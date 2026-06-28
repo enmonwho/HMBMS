@@ -1,10 +1,8 @@
-import safetyBg from '../../../images/image2.png';
-
 export default function Safety() {
   return (
     <div 
       className="donate-info-wrapper" 
-      style={{ backgroundImage: `url(${safetyBg})` }}
+      style={{ backgroundImage: `url(/images/image2.png)` }}
     >
       <div className="donate-info-card">
         <div className="donate-watermark"></div>
