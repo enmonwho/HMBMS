@@ -45,9 +45,8 @@ export default function Donors() {
   const { role } = useAuth();
   const canEdit = role !== 'Medical Technologist';
 
-  async function fetchDonors() {
+  const fetchDonors = async () => {
     try {
-      setLoading(true);
       const { data, error } = await supabase
         .from('donors')
         .select(`
@@ -58,7 +57,7 @@ export default function Donors() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDonors((data as any) || []);
+      setDonors((data as unknown as DonorRecord[]) || []);
     } catch (err) {
       console.error('Error fetching donors:', err);
     } finally {
@@ -67,7 +66,7 @@ export default function Donors() {
   }
 
   useEffect(() => {
-    fetchDonors();
+    setTimeout(fetchDonors, 0);
   }, []);
 
   const filteredDonors = useMemo(() => {
@@ -142,7 +141,7 @@ export default function Donors() {
       </div>
 
       <div className="flex gap-4 mb-6">
-        <div className="admin-searchbar flex-1 !mb-0">
+        <div className="admin-searchbar flex-1 mb-0!">
           <MagnifyingGlass className="admin-searchbar-icon text-slate-400" size={18} aria-hidden="true" />
           <input
             type="text"
