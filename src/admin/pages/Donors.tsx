@@ -148,16 +148,29 @@ export default function Donors() {
             aria-label="Search donor"
           />
         </div>
-        <select 
-          className="admin-modal-input w-48 !mb-0" 
-          value={statusFilter} 
-          onChange={e => setStatusFilter(e.target.value)}
-          aria-label="Filter by status"
-        >
-          <option value="ALL">All Statuses</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-        </select>
+        <div className="flex bg-slate-100 p-1 rounded-lg shrink-0 border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('ALL')}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${statusFilter === 'ALL' ? 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('ACTIVE')}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${statusFilter === 'ACTIVE' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('INACTIVE')}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${statusFilter === 'INACTIVE' ? 'bg-white text-red-600 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+          >
+            Inactive
+          </button>
+        </div>
       </div>
 
       <div className="admin-with-panel flex gap-6 items-start">
