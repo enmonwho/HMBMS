@@ -8,7 +8,7 @@ export default function Safety() {
         <div className="donate-watermark"></div>
 
         <div className="donate-info-header">
-          <h1>SAFETY <span className="text-xl lg:text-2xl font-medium normal-case block mt-2 text-slate-600">(assurance to the patients and donors)</span></h1>
+          <h1>SAFETY <span className="text-xl lg:text-2xl font-medium normal-case block mt-2 text-slate-600"></span></h1>
         </div>
 
         <div className="donate-info-section mt-8">
