@@ -141,7 +141,22 @@ export default function Applicants() {
           console.error('Error creating donor:', donorError);
           alert('Applicant approved, but failed to create Donor record automatically. Please check logs.');
         } else {
-          alert('Applicant approved and added to Donors directory!');
+          try {
+            const applicant = applicants.find(a => a.id === id);
+            if (applicant && applicant.contact_number) {
+              await fetch('/api/send-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  phoneNumber: applicant.contact_number,
+                  message: `Congratulations ${applicant.first_name}! Your application to the Makati Human Milk Bank has been accepted.`
+                })
+              });
+            }
+          } catch (smsErr) {
+            console.error('Failed to send approval SMS:', smsErr);
+          }
+          alert('Applicant approved and added to Donors directory! SMS notification sent.');
         }
       }
       

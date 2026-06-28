@@ -26,6 +26,7 @@ export default function Dispensing() {
     beneficiary_id: '',
     volume_dispensed_ml: '',
     dispensed_date: new Date().toISOString().split('T')[0],
+    contact_number: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,13 +97,34 @@ export default function Dispensing() {
         .single();
 
       if (error) throw error;
+      
+      // Send SMS notification if a contact number was provided
+      if (formData.contact_number) {
+        try {
+          const selectedBen = activeBeneficiaries.find(b => b.id === formData.beneficiary_id);
+          const name = selectedBen?.patient_name || 'Beneficiary';
+          await fetch('/api/send-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phoneNumber: formData.contact_number,
+              message: `Hello from Makati Human Milk Bank! This is to inform you that the requested ${formData.volume_dispensed_ml}mL of milk for ${name} is now available and ready for dispensing.`
+            })
+          });
+        } catch (smsErr) {
+          console.error('Failed to send dispensing SMS:', smsErr);
+        }
+      }
+
       setRecords(prev => [data as any, ...prev]);
       setIsModalOpen(false);
       setFormData({
         beneficiary_id: '',
         volume_dispensed_ml: '',
         dispensed_date: new Date().toISOString().split('T')[0],
+        contact_number: '',
       });
+      alert(formData.contact_number ? 'Milk successfully dispensed and SMS notification sent!' : 'Milk successfully dispensed!');
     } catch (err) {
       console.error('Error dispensing milk:', err);
       alert('Failed to dispense milk.');
@@ -231,6 +253,20 @@ export default function Dispensing() {
                   className="admin-modal-input"
                   value={formData.dispensed_date}
                   onChange={e => setFormData({ ...formData, dispensed_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5 mt-4 border-t border-slate-100 pt-4">
+                <label htmlFor="contact_number" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  Contact Number <span className="text-xs text-slate-400 font-normal">(Optional SMS Notification)</span>
+                </label>
+                <input
+                  id="contact_number"
+                  type="text"
+                  className="admin-modal-input"
+                  placeholder="e.g. 09123456789"
+                  value={formData.contact_number}
+                  onChange={e => setFormData({ ...formData, contact_number: e.target.value })}
                 />
               </div>
 
