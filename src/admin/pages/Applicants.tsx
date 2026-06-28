@@ -129,37 +129,60 @@ export default function Applicants() {
         
       if (error) throw error;
       
-      // Auto-create donor if approved
+      // Handle Donor record synchronization
       if (newStatus === 'APPROVED') {
-        const donorNumber = `D-${Math.floor(1000 + Math.random() * 9000)}`;
-        const { error: donorError } = await supabase
+        // First check if a donor record already exists for this applicant
+        const { data: existingDonor } = await supabase
           .from('donors')
-          .insert([{
-            applicant_id: id,
-            donor_number: donorNumber,
-            status: 'ACTIVE'
-          }]);
-          
-        if (donorError) {
-          console.error('Error creating donor:', donorError);
-          alert('Applicant approved, but failed to create Donor record automatically. Please check logs.');
-        } else {
-          try {
-            const applicant = applicants.find(a => a.id === id);
-            if (applicant && applicant.contact_number) {
-              await fetch('/api/send-sms', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  phoneNumber: applicant.contact_number,
-                  message: `Congratulations ${applicant.first_name}! Your application to the Makati Human Milk Bank has been accepted.`
-                })
-              });
+          .select('id')
+          .eq('applicant_id', id)
+          .maybeSingle();
+
+        if (!existingDonor) {
+          const donorNumber = `D-${Math.floor(1000 + Math.random() * 9000)}`;
+          const { error: donorError } = await supabase
+            .from('donors')
+            .insert([{
+              applicant_id: id,
+              donor_number: donorNumber,
+              status: 'ACTIVE'
+            }]);
+            
+          if (donorError) {
+            console.error('Error creating donor:', donorError);
+            alert('Applicant approved, but failed to create Donor record automatically. Please check logs.');
+          } else {
+            try {
+              const applicant = applicants.find(a => a.id === id);
+              if (applicant && applicant.contact_number) {
+                await fetch('/api/send-sms', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    phoneNumber: applicant.contact_number,
+                    message: `Congratulations ${applicant.first_name}! Your application to the Makati Human Milk Bank has been accepted.`
+                  })
+                });
+              }
+            } catch (smsErr) {
+              console.error('Failed to send approval SMS:', smsErr);
             }
-          } catch (smsErr) {
-            console.error('Failed to send approval SMS:', smsErr);
+            alert('Applicant approved and added to Donors directory! SMS notification sent.');
           }
-          alert('Applicant approved and added to Donors directory! SMS notification sent.');
+        } else {
+          // If a donor already existed, just let them know it was re-approved
+          alert('Applicant approved. An existing donor record was found and retained.');
+        }
+      } else {
+        // If status is reverted to PENDING or REJECTED, remove the donor record if it exists
+        // (Assuming no milk collections exist yet. If they do, foreign keys will block this, which is a safe safeguard).
+        const { error: removeError } = await supabase
+          .from('donors')
+          .delete()
+          .eq('applicant_id', id);
+        
+        if (removeError) {
+          console.error('Error removing donor record:', removeError);
         }
       }
       
