@@ -346,7 +346,7 @@ export default function Donors() {
                   const { error } = await supabase.from('milk_collections').insert([{
                     donor_id: selectedDonor.id,
                     volume_ml: vol,
-                    status: 'COMPLETE',
+                    status: 'PENDING LABORATORY',
                     barcode: newBarcode,
                     collection_date: new Date().toISOString()
                   }]);
