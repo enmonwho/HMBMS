@@ -188,9 +188,9 @@ export default function Pasteurization() {
       <PageHeader title="Batch Records" />
 
       {canEdit && (
-        <div className="flex items-center justify-end mb-6">
+        <div className="flex items-center justify-end" style={{ marginBottom: '24px' }}>
           <button
-            className="admin-pill-action-btn bg-(--admin-navy) text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-(--admin-navy-dark) transition-colors flex items-center gap-2"
+            className="admin-pill-action-btn flex items-center gap-2"
             onClick={() => setIsCreateModalOpen(true)}
           >
             <Plus size={18} weight="bold" />
@@ -285,34 +285,61 @@ export default function Pasteurization() {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Select Source Collections</label>
-                <div className="border border-slate-200 rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
-                  {passedCollections.map(c => (
-                    <label key={c.id} className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={createData.collection_ids.includes(c.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setCreateData(prev => ({ ...prev, collection_ids: [...prev.collection_ids, c.id] }));
-                          } else {
-                            setCreateData(prev => ({ ...prev, collection_ids: prev.collection_ids.filter(id => id !== c.id) }));
-                          }
-                        }}
-                        className="rounded border-slate-300 text-(--admin-navy) focus:ring-(--admin-navy)"
-                      />
-                      <span className="text-sm">
-                        {c.id.slice(0, 8)} - {c.donors?.applicants?.first_name} {c.donors?.applicants?.last_name} ({c.volume_ml} mL)
-                      </span>
-                    </label>
-                  ))}
+                <div className="border border-slate-200 rounded-lg p-2 max-h-56 overflow-y-auto space-y-1 bg-slate-50 shadow-inner">
+                  {passedCollections.map(c => {
+                    const isSelected = createData.collection_ids.includes(c.id);
+                    return (
+                      <label 
+                        key={c.id} 
+                        className={`flex items-center gap-3 cursor-pointer p-2.5 rounded-md border transition-all ${
+                          isSelected ? 'bg-white border-[#0d5780] shadow-sm' : 'bg-white border-transparent hover:border-slate-300'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0 ${
+                          isSelected ? 'bg-[#0d5780] border-[#0d5780]' : 'bg-slate-50 border-slate-300'
+                        }`}>
+                          {isSelected && (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          className="hidden"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setCreateData(prev => ({ ...prev, collection_ids: [...prev.collection_ids, c.id] }));
+                            } else {
+                              setCreateData(prev => ({ ...prev, collection_ids: prev.collection_ids.filter(id => id !== c.id) }));
+                            }
+                          }}
+                        />
+                        <span className="text-sm font-semibold text-slate-900 flex-1 flex items-center justify-between">
+                          <span>
+                            {c.donors?.applicants?.first_name} {c.donors?.applicants?.last_name}
+                          </span>
+                          <span className="ml-2 px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-xs">
+                            {c.volume_ml} mL
+                          </span>
+                        </span>
+                      </label>
+                    );
+                  })}
                   {passedCollections.length === 0 && (
-                    <p className="text-xs text-amber-600 mt-1">No collections passed laboratory tests yet.</p>
+                    <div className="text-center py-4 text-slate-500 text-sm bg-white rounded-md border border-slate-200">
+                      No collections have passed laboratory tests yet.
+                    </div>
                   )}
                 </div>
                 {createData.collection_ids.length > 0 && (
-                  <p className="text-sm font-semibold text-slate-800 mt-2">
-                    Total Pooled Volume: {passedCollections.filter(c => createData.collection_ids.includes(c.id)).reduce((sum, c) => sum + (c.volume_ml || 0), 0)} mL
-                  </p>
+                  <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-md p-3 mt-3">
+                    <span className="text-sm font-semibold text-blue-900">Total Pooled Volume</span>
+                    <span className="text-lg font-black text-blue-700">
+                      {passedCollections.filter(c => createData.collection_ids.includes(c.id)).reduce((sum, c) => sum + (c.volume_ml || 0), 0).toLocaleString()} mL
+                    </span>
+                  </div>
                 )}
               </div>
 
