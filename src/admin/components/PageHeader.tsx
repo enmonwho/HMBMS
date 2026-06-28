@@ -89,47 +89,51 @@ export default function PageHeader({ title }: PageHeaderProps) {
   const alertCount = (hasLowStock ? 1 : 0) + (hasExpiring ? 1 : 0);
 
   return (
-    <div className="admin-page-head flex items-center justify-between relative">
+    <div className="admin-page-head flex items-center justify-between relative z-[100]">
       <h1>{title}</h1>
       <div className="flex items-center gap-6">
         
         <div className="relative" ref={notifRef}>
           <button 
-            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full relative transition-colors"
+            className="p-2 text-slate-200 hover:text-white hover:bg-white/10 rounded-full relative transition-colors"
             onClick={() => setShowNotifications(!showNotifications)}
           >
             <Bell size={24} />
             {alertCount > 0 && (
-              <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+              <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 border-2 border-[var(--admin-navy)] rounded-full"></span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                <span className="font-semibold text-slate-700">Notifications</span>
-                {alertCount > 0 && <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">{alertCount}</span>}
+            <div className="absolute right-0 mt-3 w-[400px] bg-[#f6f1e7] border border-[var(--admin-border)] rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.15)] overflow-hidden">
+              <div className="bg-[var(--admin-navy)] text-white px-5 py-4 flex justify-between items-center rounded-t-xl">
+                <span className="text-[1.15rem] font-bold tracking-wide">Notifications</span>
+                {alertCount > 0 && <span className="text-xs bg-white text-[var(--admin-navy)] font-bold px-2 py-0.5 rounded-full">{alertCount}</span>}
               </div>
               <div className="max-h-[400px] overflow-y-auto">
                 {alertCount === 0 ? (
-                  <div className="p-4 text-center text-sm text-slate-500">No new notifications</div>
+                  <div className="p-6 text-center text-sm text-slate-500 font-medium">No new notifications</div>
                 ) : (
                   <div className="flex flex-col">
                     {hasLowStock && (
-                      <div className="p-4 border-b border-slate-100 flex items-start gap-3 bg-red-50/50">
-                        <Warning className="text-red-500 mt-0.5 shrink-0" weight="fill" size={20} />
+                      <div className="p-5 border-b border-black/5 flex items-start gap-4 bg-white/50">
+                        <div className="text-red-500 mt-0.5 shrink-0 bg-red-50 p-2 rounded-full">
+                          <Warning weight="fill" size={24} />
+                        </div>
                         <div>
-                          <p className="text-sm font-bold text-red-800 mb-0.5">Low Stock Alert!</p>
-                          <p className="text-xs text-red-700">Total available milk is dangerously low ({totalVolume} mL). Recommended minimum is 2,000 mL.</p>
+                          <p className="text-[0.95rem] font-bold text-slate-800 mb-1">Low Stock Alert!</p>
+                          <p className="text-[0.85rem] text-slate-600 leading-snug">Total available milk is dangerously low ({totalVolume} mL). Recommended minimum is 2,000 mL.</p>
                         </div>
                       </div>
                     )}
                     {hasExpiring && (
-                      <div className="p-4 border-b border-slate-100 flex items-start gap-3 bg-amber-50/50">
-                        <Clock className="text-amber-500 mt-0.5 shrink-0" weight="fill" size={20} />
+                      <div className="p-5 border-b border-black/5 flex items-start gap-4 bg-white/50">
+                        <div className="text-amber-500 mt-0.5 shrink-0 bg-amber-50 p-2 rounded-full">
+                          <Clock weight="fill" size={24} />
+                        </div>
                         <div>
-                          <p className="text-sm font-bold text-amber-800 mb-0.5">Batches Expiring Soon</p>
-                          <p className="text-xs text-amber-700">You have {expiringBatches.length} batch(es) expiring within the next 7 days.</p>
+                          <p className="text-[0.95rem] font-bold text-slate-800 mb-1">Batches Expiring Soon</p>
+                          <p className="text-[0.85rem] text-slate-600 leading-snug">You have {expiringBatches.length} batch(es) expiring within the next 7 days. Prioritize dispensing these!</p>
                         </div>
                       </div>
                     )}
