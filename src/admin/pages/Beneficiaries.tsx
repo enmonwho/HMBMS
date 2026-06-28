@@ -142,6 +142,7 @@ export default function Beneficiaries() {
                 <th>Infant Name</th>
                 <th>Parent/Guardian</th>
                 <th>Affiliated Hospital</th>
+                <th>Volume Tracking</th>
                 <th>Date Registered</th>
                 <th>Status</th>
               </tr>
@@ -167,6 +168,7 @@ export default function Beneficiaries() {
                   <td className="admin-table-name">{b.patient_name}</td>
                   <td>{b.parent_name}</td>
                   <td>{b.hospital_id}</td>
+                  <td><span className="font-semibold text-slate-700">{b.dispensing_records?.reduce((acc, curr) => acc + (curr.volume_dispensed_ml || 0), 0) || 0}</span> / {b.required_volume_ml} mL</td>
                   <td>{new Date(b.created_at).toLocaleDateString()}</td>
                   <td>
                     <StatusPill status={b.status} />

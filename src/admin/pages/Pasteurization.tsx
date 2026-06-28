@@ -8,7 +8,9 @@ import { Plus, X, PencilSimple } from '@phosphor-icons/react';
 interface BatchRecord {
   id: string;
   batch_id: string;
-  collection_id: string;
+  collection_id?: string;
+  collection_ids?: string[];
+  total_volume_ml?: number;
   temperature_c: number | null;
   duration_minutes: number | null;
   status: string;
@@ -24,16 +26,19 @@ export default function Pasteurization() {
   const [loading, setLoading] = useState(true);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [createData, setCreateData] = useState({
+  const [createData, setCreateData] = useState<{
+    batch_id: string;
+    collection_ids: string[];
+  }>({
     batch_id: '',
-    collection_id: '',
+    collection_ids: [],
   });
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [updateData, setUpdateData] = useState({
     id: '',
     batch_id: '',
-    collection_id: '',
+    total_volume_ml: 0,
     temperature_c: '',
     duration_minutes: '',
     status: 'PASSED',
@@ -78,11 +83,15 @@ export default function Pasteurization() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const selectedCollections = passedCollections.filter(c => createData.collection_ids.includes(c.id));
+      const totalVolume = selectedCollections.reduce((sum, c) => sum + (c.volume_ml || 0), 0);
+
       const { data, error } = await supabase
         .from('batches')
         .insert([{
           batch_id: createData.batch_id,
-          collection_id: createData.collection_id,
+          collection_ids: createData.collection_ids,
+          total_volume_ml: totalVolume,
           status: 'PENDING'
         }])
         .select()
@@ -94,12 +103,12 @@ export default function Pasteurization() {
       await supabase
         .from('milk_collections')
         .update({ status: 'PROCESSING' })
-        .eq('id', createData.collection_id);
+        .in('id', createData.collection_ids);
 
       setBatches(prev => [data, ...prev]);
-      setPassedCollections(prev => prev.filter(c => c.id !== createData.collection_id));
+      setPassedCollections(prev => prev.filter(c => !createData.collection_ids.includes(c.id)));
       setIsCreateModalOpen(false);
-      setCreateData({ batch_id: '', collection_id: '' });
+      setCreateData({ batch_id: '', collection_ids: [] });
     } catch (err) {
       console.error('Error creating batch:', err);
       alert('Failed to create batch.');
@@ -128,14 +137,7 @@ export default function Pasteurization() {
 
       // 2. If PASSED, auto-add to inventory
       if (updateData.status === 'PASSED') {
-        // fetch collection to get volume
-        const { data: collData } = await supabase
-          .from('milk_collections')
-          .select('volume_ml')
-          .eq('id', updateData.collection_id)
-          .single();
-
-        const vol = collData?.volume_ml || 0;
+        const vol = updateData.total_volume_ml || 0;
 
         // +6 months expiry
         const expiry = new Date();
@@ -173,7 +175,7 @@ export default function Pasteurization() {
     setUpdateData({
       id: batch.id,
       batch_id: batch.batch_id,
-      collection_id: batch.collection_id,
+      total_volume_ml: batch.total_volume_ml || 0,
       temperature_c: batch.temperature_c ? String(batch.temperature_c) : '',
       duration_minutes: batch.duration_minutes ? String(batch.duration_minutes) : '',
       status: batch.status === 'PENDING' ? 'PASSED' : batch.status,
@@ -203,7 +205,8 @@ export default function Pasteurization() {
           <thead>
             <tr>
               <th>Batch ID</th>
-              <th>Collection ID</th>
+              <th>Source</th>
+              <th>Volume</th>
               <th>Date</th>
               <th>Temperature</th>
               <th>Duration</th>
@@ -224,7 +227,8 @@ export default function Pasteurization() {
               batches.map(b => (
                 <tr key={b.id}>
                   <td>{b.batch_id}</td>
-                  <td>{b.collection_id}</td>
+                  <td>{b.collection_ids ? `${b.collection_ids.length} Collections` : (b.collection_id ? b.collection_id.substring(0, 8) : 'N/A')}</td>
+                  <td>{b.total_volume_ml ? `${b.total_volume_ml} mL` : 'Unknown'}</td>
                   <td>{new Date(b.created_at).toLocaleDateString()}</td>
                   <td>{b.temperature_c != null ? `${b.temperature_c}°C` : '—'}</td>
                   <td>{b.duration_minutes != null ? `${b.duration_minutes} min` : '—'}</td>
@@ -280,23 +284,35 @@ export default function Pasteurization() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="collection_id" className="text-sm font-medium text-slate-700">Select Source Collection</label>
-                <select
-                  id="collection_id"
-                  required
-                  className="admin-modal-input"
-                  value={createData.collection_id}
-                  onChange={e => setCreateData({ ...createData, collection_id: e.target.value })}
-                >
-                  <option value="" disabled>-- Choose passed collection --</option>
+                <label className="text-sm font-medium text-slate-700">Select Source Collections</label>
+                <div className="border border-slate-200 rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
                   {passedCollections.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.id.slice(0, 8)} - {c.donors?.applicants?.first_name} {c.donors?.applicants?.last_name} ({c.volume_ml} mL)
-                    </option>
+                    <label key={c.id} className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={createData.collection_ids.includes(c.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCreateData(prev => ({ ...prev, collection_ids: [...prev.collection_ids, c.id] }));
+                          } else {
+                            setCreateData(prev => ({ ...prev, collection_ids: prev.collection_ids.filter(id => id !== c.id) }));
+                          }
+                        }}
+                        className="rounded border-slate-300 text-(--admin-navy) focus:ring-(--admin-navy)"
+                      />
+                      <span className="text-sm">
+                        {c.id.slice(0, 8)} - {c.donors?.applicants?.first_name} {c.donors?.applicants?.last_name} ({c.volume_ml} mL)
+                      </span>
+                    </label>
                   ))}
-                </select>
-                {passedCollections.length === 0 && (
-                  <p className="text-xs text-amber-600 mt-1">No collections passed laboratory tests yet.</p>
+                  {passedCollections.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">No collections passed laboratory tests yet.</p>
+                  )}
+                </div>
+                {createData.collection_ids.length > 0 && (
+                  <p className="text-sm font-semibold text-slate-800 mt-2">
+                    Total Pooled Volume: {passedCollections.filter(c => createData.collection_ids.includes(c.id)).reduce((sum, c) => sum + (c.volume_ml || 0), 0)} mL
+                  </p>
                 )}
               </div>
 
@@ -312,7 +328,7 @@ export default function Pasteurization() {
                 <button
                   type="submit"
                   className="admin-btn-save"
-                  disabled={isSubmitting || passedCollections.length === 0}
+                  disabled={isSubmitting || createData.collection_ids.length === 0}
                 >
                   {isSubmitting ? 'Creating...' : 'Create Batch'}
                 </button>
