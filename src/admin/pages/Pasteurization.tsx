@@ -90,6 +90,7 @@ export default function Pasteurization() {
         .from('batches')
         .insert([{
           batch_id: createData.batch_id,
+          collection_id: createData.collection_ids[0],
           collection_ids: createData.collection_ids,
           total_volume_ml: totalVolume,
           status: 'PENDING'
