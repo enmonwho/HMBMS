@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabase'
 
 // ── Types ──
@@ -160,6 +161,7 @@ const donationQuestions: { key: keyof Omit<DonatingMilk, 'preferredDateTime'>; q
 ]
 
 export default function DonateForm() {
+  const navigate = useNavigate()
   const [form, setForm] = useState<FormState>(initialForm)
 
   const handleChange = useCallback(
@@ -227,6 +229,7 @@ export default function DonateForm() {
 
       alert("Thank you! Your donation form has been submitted.");
       setForm(initialForm);
+      navigate('/');
     } catch (error) {
       console.error('Form submission error:', error);
       const msg = error instanceof Error ? error.message : JSON.stringify(error);
