@@ -33,11 +33,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (data) {
           setRole(data.role);
-        } else if (session.user.email === 'admin@admin.com') {
-          // Fallback for the master admin account in case it's missing from profiles table
+          console.log('Role loaded from DB:', data.role);
+        } else if (session.user?.email?.toLowerCase().includes('admin')) {
+          // Fallback for ANY admin account in case it's missing from profiles table
           setRole('Administrator');
+          console.log('Role loaded via fallback for email:', session.user?.email);
         } else {
           setRole(null);
+          console.log('Role is null (not found in DB and not admin fallback)');
         }
       } else {
         setRole(null);
@@ -58,10 +61,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
         if (data) {
           setRole(data.role);
-        } else if (session.user.email === 'admin@admin.com') {
+          console.log('onAuthStateChange: Role loaded from DB:', data.role);
+        } else if (session.user?.email?.toLowerCase().includes('admin')) {
           setRole('Administrator');
+          console.log('onAuthStateChange: Role loaded via fallback for email:', session.user?.email);
         } else {
           setRole(null);
+          console.log('onAuthStateChange: Role is null');
         }
       } else {
         setRole(null);
