@@ -277,9 +277,9 @@ export default function Donors() {
                 e.preventDefault();
                 setIsSubmitting(true);
                 try {
-                  const vol = parseInt(collectionForm.volume_ml, 10);
-                  if (vol < 30 || vol > 240) {
-                     alert("Collection volume must be between 30 mL and 240 mL per session.");
+                  const vol = Math.round(parseFloat(collectionForm.volume_ml) * 1000);
+                  if (vol < 30 || vol > 5000) {
+                     alert("Collection volume must be between 0.03 L and 5.0 L per session.");
                      setIsSubmitting(false);
                      return;
                   }
@@ -293,8 +293,8 @@ export default function Donors() {
                     .lte('collection_date', `${todayDate}T23:59:59.999Z`);
                     
                   const totalToday = (todayCollections || []).reduce((sum, c) => sum + c.volume_ml, 0);
-                  if (totalToday + vol > 800) {
-                     alert(`Daily limit exceeded! This donor has already donated ${totalToday} mL today. Adding ${vol} mL exceeds the 800 mL/day limit.`);
+                  if (totalToday + vol > 10000) {
+                     alert(`Daily limit exceeded! This donor has already donated ${(totalToday / 1000).toFixed(2)} L today. Adding ${(vol / 1000).toFixed(2)} L exceeds the 10.0 L/day limit.`);
                      setIsSubmitting(false);
                      return;
                   }
@@ -317,7 +317,7 @@ export default function Donors() {
                     if (!prev) return prev;
                     return {
                       ...prev,
-                      milk_collections: [...(prev.milk_collections || []), { volume_ml: parseInt(collectionForm.volume_ml, 10) }]
+                      milk_collections: [...(prev.milk_collections || []), { volume_ml: vol }]
                     };
                   });
 
@@ -332,15 +332,16 @@ export default function Donors() {
                 }
               }} className="admin-modal-body space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Volume (in mL)</label>
+                  <label className="text-sm font-medium text-slate-700">Volume (in Liters)</label>
                   <input 
                     type="number"
-                    min="1"
+                    step="0.01"
+                    min="0.03"
                     required
                     className="admin-modal-input"
                     value={collectionForm.volume_ml}
                     onChange={e => setCollectionForm({ volume_ml: e.target.value })}
-                    placeholder="e.g. 150"
+                    placeholder="e.g. 0.15"
                   />
                 </div>
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
