@@ -168,6 +168,20 @@ export default function Pasteurization() {
         }
       }
 
+      // Update collections status based on the new batch status
+      const batchToUpdate = batches.find(b => b.id === updateData.id);
+      const collIds = batchToUpdate?.collection_ids || (batchToUpdate?.collection_id ? [batchToUpdate.collection_id] : []);
+      if (collIds.length > 0) {
+        let newCollectionStatus = 'PROCESSING';
+        if (updateData.status === 'PASSED') newCollectionStatus = 'COMPLETE';
+        else if (updateData.status === 'REJECTED') newCollectionStatus = 'REJECTED';
+        
+        await supabase
+          .from('milk_collections')
+          .update({ status: newCollectionStatus })
+          .in('id', collIds);
+      }
+
       setBatches(prev => prev.map(b => b.id === updateData.id ? updatedBatch : b));
       setIsUpdateModalOpen(false);
     } catch (err) {
@@ -212,6 +226,15 @@ export default function Pasteurization() {
         alert('Batch passed, but failed to auto-add to inventory.');
       } else {
         alert('Batch passed and successfully added to Inventory!');
+      }
+
+      // Update collections status to COMPLETE
+      const collIds = batch.collection_ids || (batch.collection_id ? [batch.collection_id] : []);
+      if (collIds.length > 0) {
+        await supabase
+          .from('milk_collections')
+          .update({ status: 'COMPLETE' })
+          .in('id', collIds);
       }
 
       setBatches(prev => prev.map(b => b.id === batch.id ? updatedBatch : b));
