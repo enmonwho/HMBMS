@@ -22,9 +22,9 @@ export default function PageHeader({ title }: PageHeaderProps) {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (authUser) {
-          // Attempt to find user details in system_users table
+          // Attempt to find user details in profiles table
           const { data } = await supabase
-            .from('system_users')
+            .from('profiles')
             .select('full_name, role')
             .eq('email', authUser.email)
             .single();
@@ -32,7 +32,7 @@ export default function PageHeader({ title }: PageHeaderProps) {
           if (data) {
             setUser({ name: data.full_name, role: data.role });
           } else {
-            // Fallback if not yet configured in system_users
+            // Fallback if not yet configured in profiles
             setUser({ name: authUser.email || 'System Admin', role: 'Administrator' });
           }
         } else {

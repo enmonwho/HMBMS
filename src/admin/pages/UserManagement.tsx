@@ -42,7 +42,7 @@ export default function UserManagement() {
     async function fetchUsers() {
       try {
         const { data, error } = await supabase
-          .from('system_users')
+          .from('profiles')
           .select('*')
           .order('created_at', { ascending: true });
 
@@ -91,7 +91,7 @@ export default function UserManagement() {
 
       // Create system user record
       const { data, error } = await supabase
-        .from('system_users')
+        .from('profiles')
         .insert([{
           user_id: authData.user?.id || formData.user_id, // Link to auth user if possible
           full_name: formData.full_name,
@@ -134,7 +134,7 @@ export default function UserManagement() {
     setIsSubmitting(true);
     try {
       const { data, error } = await supabase
-        .from('system_users')
+        .from('profiles')
         .update({
           full_name: editFormData.full_name,
           role: editFormData.role,
