@@ -5,6 +5,7 @@ import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
 import { PencilSimple, X, Warning, Info } from '@phosphor-icons/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { formatVolume } from '../../shared/lib/formatters';
 
 interface InventoryItem {
   id: string;
@@ -167,7 +168,7 @@ export default function Inventory() {
       <div className="admin-stat-grid mb-6">
         <div className="admin-stat-card tone-blue">
           <div className="admin-stat-label">Current stock</div>
-          <div className="admin-stat-value">{(availableVolume / 1000).toFixed(1)} L</div>
+          <div className="admin-stat-value">{formatVolume(availableVolume)}</div>
           {availableVolume < 5000 && (
             <div className="mt-2 text-[0.9rem] font-semibold text-red-600 flex items-center gap-1.5">
               <Warning size={16} weight="bold" /> Low stock level
@@ -177,19 +178,19 @@ export default function Inventory() {
         
         <div className="admin-stat-card tone-amber">
           <div className="admin-stat-label">Min. threshold</div>
-          <div className="admin-stat-value">5.0 L</div>
+          <div className="admin-stat-value">{formatVolume(5000)}</div>
           <div className="text-slate-500 text-xs font-medium mt-1">Safety floor</div>
         </div>
 
         <div className="admin-stat-card tone-green">
           <div className="admin-stat-label">Dispensed</div>
-          <div className="admin-stat-value">{(monthDispensed / 1000).toFixed(1)} L</div>
+          <div className="admin-stat-value">{formatVolume(monthDispensed)}</div>
           <div className="text-slate-500 text-xs font-medium mt-1">This month</div>
         </div>
 
         <div className="admin-stat-card tone-red">
           <div className="admin-stat-label">Discarded</div>
-          <div className="admin-stat-value">{(monthDiscarded / 1000).toFixed(1)} L</div>
+          <div className="admin-stat-value">{formatVolume(monthDiscarded)}</div>
           <div className="text-slate-500 text-xs font-medium mt-1">This month</div>
         </div>
       </div>
@@ -278,9 +279,10 @@ export default function Inventory() {
                       <button
                         type="button"
                         className="admin-edit-btn"
+                        title="Update Status"
                         onClick={() => openModal(item)}
                       >
-                        <PencilSimple size={16} /> Update
+                        <PencilSimple size={18} />
                       </button>
                     )}
                   </td>

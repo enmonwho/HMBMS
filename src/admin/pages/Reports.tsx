@@ -4,6 +4,7 @@ import type { ReportType } from '../../shared/lib/types';
 import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
 import { DownloadSimple } from '@phosphor-icons/react';
+import { formatVolume } from '../../shared/lib/formatters';
 
 const reportTypes: ReportType[] = ['Inventory Summary', 'Beneficiary Logs', 'Processing Yield'];
 
@@ -27,8 +28,8 @@ export default function Reports() {
 
   const [stats, setStats] = useState({
     totalDonorsThisMonth: 0,
-    totalVolumeCollectedLiters: '0.0',
-    totalVolumeDispensedLiters: '0.0',
+    totalVolumeCollected: 0,
+    totalVolumeDispensed: 0,
     expired: 0
   });
 
@@ -52,17 +53,17 @@ export default function Reports() {
         const [donorsRes, collRes, dispRes, expRes] = await Promise.all([
           supabase.from('donors').select('*', { count: 'exact', head: true }).gte('created_at', startOfMonth),
           supabase.from('milk_collections').select('volume_ml'),
-          supabase.from('dispensing_records').select('total_volume_ml'),
+          supabase.from('dispensing_records').select('volume_dispensed_ml'),
           supabase.from('inventory').select('*', { count: 'exact', head: true }).eq('status', 'EXPIRED')
         ]);
 
         const totalCollected = (collRes.data || []).reduce((sum, c) => sum + (c.volume_ml || 0), 0);
-        const totalDispensed = (dispRes.data || []).reduce((sum, d) => sum + (d.total_volume_ml || 0), 0);
+        const totalDispensed = (dispRes.data || []).reduce((sum, d) => sum + (d.volume_dispensed_ml || 0), 0);
 
         setStats({
           totalDonorsThisMonth: donorsRes.count || 0,
-          totalVolumeCollectedLiters: (totalCollected / 1000).toFixed(1),
-          totalVolumeDispensedLiters: (totalDispensed / 1000).toFixed(1),
+          totalVolumeCollected: totalCollected,
+          totalVolumeDispensed: totalDispensed,
           expired: expRes.count || 0
         });
       } catch (err) {
@@ -163,12 +164,12 @@ export default function Reports() {
           <div className="admin-stat-value">{stats.totalDonorsThisMonth}</div>
         </div>
         <div className="admin-stat-card tone-amber">
-          <div className="admin-stat-label">Total Volume Collected<br />(Liters)</div>
-          <div className="admin-stat-value">{stats.totalVolumeCollectedLiters}</div>
+          <div className="admin-stat-label">Total Volume Collected</div>
+          <div className="admin-stat-value">{formatVolume(stats.totalVolumeCollected)}</div>
         </div>
         <div className="admin-stat-card tone-blue">
-          <div className="admin-stat-label">Total Volume Dispensed<br />(Liters)</div>
-          <div className="admin-stat-value">{stats.totalVolumeDispensedLiters}</div>
+          <div className="admin-stat-label">Total Volume Dispensed</div>
+          <div className="admin-stat-value">{formatVolume(stats.totalVolumeDispensed)}</div>
         </div>
         <div className="admin-stat-card tone-red">
           <div className="admin-stat-label">Expired</div>
