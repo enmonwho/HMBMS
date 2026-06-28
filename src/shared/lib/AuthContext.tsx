@@ -33,6 +33,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (data) {
           setRole(data.role);
+        } else if (session.user.email === 'admin@admin.com') {
+          // Fallback for the master admin account in case it's missing from profiles table
+          setRole('Administrator');
+        } else {
+          setRole(null);
         }
       } else {
         setRole(null);
@@ -51,7 +56,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select('role')
           .eq('user_id', session.user.id)
           .single();
-        if (data) setRole(data.role);
+        if (data) {
+          setRole(data.role);
+        } else if (session.user.email === 'admin@admin.com') {
+          setRole('Administrator');
+        } else {
+          setRole(null);
+        }
       } else {
         setRole(null);
       }
