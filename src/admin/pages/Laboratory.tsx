@@ -3,7 +3,7 @@ import PageHeader from '../components/PageHeader';
 import StatusPill from '../../shared/components/StatusPill';
 import { supabase } from '../../shared/lib/supabase';
 import { useAuth } from '../../shared/lib/AuthContext';
-import { FileText, Plus, X } from '@phosphor-icons/react';
+import { Plus, X } from '@phosphor-icons/react';
 
 interface LabTestRecord {
   id: string;
@@ -135,18 +135,17 @@ export default function Laboratory() {
               <th>Collection ID</th>
               <th>Date Collected</th>
               <th>Donor Name</th>
-              <th>Test Result</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr className="admin-table-empty-row">
-                <td colSpan={5}>Loading tests...</td>
+                <td colSpan={4}>Loading tests...</td>
               </tr>
             ) : tests.length === 0 ? (
               <tr className="admin-table-empty-row">
-                <td colSpan={5}>No pending tests.</td>
+                <td colSpan={4}>No pending tests.</td>
               </tr>
             ) : (
               tests.map(t => (
@@ -154,11 +153,6 @@ export default function Laboratory() {
                   <td>{t.collection_id}</td>
                   <td>{new Date(t.created_at).toLocaleDateString()}</td>
                   <td className="admin-table-name">{t.donor_name || '—'}</td>
-                  <td>
-                    <span className="admin-doc-icon text-slate-400 inline-flex items-center justify-center" title="View test result" aria-label="View test result">
-                      <FileText size={18} />
-                    </span>
-                  </td>
                   <td>
                     <StatusPill status={t.status} />
                   </td>
