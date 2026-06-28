@@ -44,8 +44,8 @@ export default function Inventory() {
         setLoading(true);
         const [invRes, dispRes, collRes] = await Promise.all([
           supabase.from('inventory').select('*').order('created_at', { ascending: false }),
-          supabase.from('dispensing_records').select('volume_ml, date, status').eq('status', 'RELEASED'),
-          supabase.from('milk_collections').select('volume_ml, collection_date')
+          supabase.from('dispensing_records').select('volume_dispensed_ml, dispensed_date, created_at'),
+          supabase.from('milk_collections').select('volume_ml, collection_date, created_at')
         ]);
 
         if (invRes.error) throw invRes.error;
@@ -60,8 +60,11 @@ export default function Inventory() {
 
         if (dispRes.data) {
           tMonthDispensed = dispRes.data
-            .filter(d => new Date(d.date).getMonth() === currentMonth && new Date(d.date).getFullYear() === currentYear)
-            .reduce((sum, item) => sum + (item.volume_ml || 0), 0);
+            .filter(d => {
+              const dDate = d.dispensed_date ? new Date(d.dispensed_date) : new Date(d.created_at);
+              return dDate.getMonth() === currentMonth && dDate.getFullYear() === currentYear;
+            })
+            .reduce((sum, item) => sum + (item.volume_dispensed_ml || 0), 0);
         }
 
         if (invData) {
@@ -85,17 +88,17 @@ export default function Inventory() {
 
         if (collRes.data) {
           collRes.data.forEach(c => {
-            const d = new Date(c.collection_date);
-            const key = `${months[d.getMonth()]}`;
+            const dDate = c.collection_date ? new Date(c.collection_date) : new Date(c.created_at);
+            const key = `${months[dDate.getMonth()]}`;
             if (chartMap.has(key)) chartMap.get(key).Collected += (c.volume_ml || 0) / 1000;
           });
         }
 
         if (dispRes.data) {
           dispRes.data.forEach(d => {
-            const date = new Date(d.date);
-            const key = `${months[date.getMonth()]}`;
-            if (chartMap.has(key)) chartMap.get(key).Dispensed += (d.volume_ml || 0) / 1000;
+            const dDate = d.dispensed_date ? new Date(d.dispensed_date) : new Date(d.created_at);
+            const key = `${months[dDate.getMonth()]}`;
+            if (chartMap.has(key)) chartMap.get(key).Dispensed += (d.volume_dispensed_ml || 0) / 1000;
           });
         }
 
@@ -166,8 +169,8 @@ export default function Inventory() {
           <div className="admin-stat-label">Current stock</div>
           <div className="admin-stat-value">{(availableVolume / 1000).toFixed(1)} L</div>
           {availableVolume < 5000 && (
-            <div className="mt-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded inline-flex items-center gap-1">
-              <Warning size={14} weight="bold" /> Low
+            <div className="mt-2 text-[0.9rem] font-semibold text-red-600 flex items-center gap-1.5">
+              <Warning size={16} weight="bold" /> Low stock level
             </div>
           )}
         </div>
@@ -194,7 +197,7 @@ export default function Inventory() {
       <div className="admin-panel mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2>Monthly inventory volume (liters)</h2>
-          <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-600">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-white">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 bg-[#0ea5e9] rounded-[2px]"></div> Collected
             </div>
@@ -210,8 +213,8 @@ export default function Inventory() {
           </div>
         </div>
         
-        <div className="admin-panel-box p-6">
-          <div className="h-[320px] mb-4">
+        <div className="admin-panel-box p-6 pb-5">
+          <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -226,7 +229,7 @@ export default function Inventory() {
             </ResponsiveContainer>
           </div>
           
-          <div className="bg-amber-50 border-l-[3px] border-amber-500 rounded-r-lg p-4 flex items-start gap-3 mt-6">
+          <div className="bg-amber-50 border-l-[3px] border-amber-500 rounded-r-md p-3.5 flex items-start gap-2.5 mt-4">
             <Info className="text-amber-600 shrink-0 mt-0.5" size={18} />
             <p className="text-[0.85rem] text-amber-900 leading-relaxed">
               Stock levels below <span className="font-bold text-amber-950">5.0 L</span> trigger a low stock alert. Contact active donors or escalate to the Coordinator for urgent collection scheduling.
