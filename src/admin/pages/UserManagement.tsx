@@ -156,6 +156,27 @@ export default function UserManagement() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', selectedUserId);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.filter(u => u.id !== selectedUserId));
+      handleCloseEditModal();
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      alert('Failed to delete user.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <PageHeader title="System Users" />
@@ -217,7 +238,7 @@ export default function UserManagement() {
                       aria-label={`Manage ${u.full_name}`}
                       onClick={() => handleEditClick(u)}
                     >
-                      <Gear size={16} className="inline-block mr-1" /> Manage
+                      <Gear size={16} />
                     </button>
                   </td>
                 </tr>
@@ -394,22 +415,32 @@ export default function UserManagement() {
                 </select>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3" style={{ marginTop: '2.5rem' }}>
                 <button
                   type="button"
-                  className="admin-btn-cancel"
-                  onClick={handleCloseEditModal}
+                  className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded transition-colors"
+                  onClick={handleDeleteUser}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  Delete User
                 </button>
-                <button
-                  type="submit"
-                  className="admin-btn-save"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Saving...' : 'Update User'}
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="admin-btn-cancel"
+                    onClick={handleCloseEditModal}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="admin-btn-save"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Saving...' : 'Update User'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
