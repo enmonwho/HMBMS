@@ -142,8 +142,11 @@ export default function Pasteurization() {
 
       if (error) throw error;
 
-      // 2. If PASSED, auto-add to inventory
-      if (updateData.status === 'PASSED') {
+      // 2. Auto-add to inventory ONLY IF status is changing to PASSED
+      const originalBatch = batches.find(b => b.id === updateData.id);
+      const isNewlyPassed = originalBatch?.status !== 'PASSED' && updateData.status === 'PASSED';
+
+      if (isNewlyPassed) {
         const vol = updateData.total_volume_ml || 0;
 
         // +6 months expiry
@@ -162,7 +165,11 @@ export default function Pasteurization() {
 
         if (invError) {
           console.error('Inventory insertion error:', invError);
-          alert('Batch updated, but failed to auto-add to inventory.');
+          if (invError.code === '23505') {
+            alert('Batch passed, but failed to auto-add to inventory. A batch or item with this ID already exists in inventory.');
+          } else {
+            alert('Batch updated, but failed to auto-add to inventory.');
+          }
         } else {
           alert('Batch passed and successfully added to Inventory!');
         }
@@ -171,7 +178,7 @@ export default function Pasteurization() {
       // Update collections status based on the new batch status
       const batchToUpdate = batches.find(b => b.id === updateData.id);
       const collIds = batchToUpdate?.collection_ids || (batchToUpdate?.collection_id ? [batchToUpdate.collection_id] : []);
-      if (collIds.length > 0) {
+      if (collIds.length > 0 && originalBatch?.status !== updateData.status) {
         let newCollectionStatus = 'PROCESSING';
         if (updateData.status === 'PASSED') newCollectionStatus = 'COMPLETE';
         else if (updateData.status === 'REJECTED') newCollectionStatus = 'REJECTED';
@@ -223,7 +230,11 @@ export default function Pasteurization() {
 
       if (invError) {
         console.error('Inventory insertion error:', invError);
-        alert('Batch passed, but failed to auto-add to inventory.');
+        if (invError.code === '23505') {
+          alert('Batch passed, but failed to auto-add to inventory. A batch or item with this ID already exists in inventory.');
+        } else {
+          alert('Batch passed, but failed to auto-add to inventory.');
+        }
       } else {
         alert('Batch passed and successfully added to Inventory!');
       }
