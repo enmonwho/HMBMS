@@ -5,20 +5,15 @@ function MilkyWay() {
       <section className="milky-hero">
         <h1 className="milky-hero-title">MILKY WAY</h1>
         <h2 className="milky-hero-subtitle">
-          HOSPITAL-BASED MILK COLLECTION<br/>PROGRAM
+          HOSPITAL-BASED MILK COLLECTION<br />PROGRAM
         </h2>
       </section>
 
       <section className="milky-content-area">
         <div className="milky-text-card">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod 
-            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim 
-            veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea 
-            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate 
-            velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint 
-            occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit 
-            anim id est laborum.
+            Milky Way is MHMB's in-hospital donation program, where lactating mothers who are confined or visiting partner hospitals can donate their excess breast milk on-site. Trained MHMB staff guide each donor through screening and collection in a clean, supervised hospital setting, making it easy for new mothers to give back during their hospital stay.
+
           </p>
         </div>
       </section>
