@@ -92,8 +92,12 @@ export default function Donors() {
     });
   }, [donors, search, statusFilter]);
 
-  const activeCount = donors.filter(d => d.status === 'ACTIVE').length;
-  const inactiveCount = donors.filter(d => d.status === 'INACTIVE').length;
+  const { activeCount, inactiveCount } = useMemo(() => {
+    return {
+      activeCount: donors.filter(d => d.status === 'ACTIVE' || d.status?.toLowerCase() === 'active').length,
+      inactiveCount: donors.filter(d => d.status === 'INACTIVE' || d.status?.toLowerCase() === 'inactive').length
+    };
+  }, [donors]);
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -148,27 +152,30 @@ export default function Donors() {
             aria-label="Search donor"
           />
         </div>
-        <div className="flex bg-slate-100 p-1 rounded-lg shrink-0 border border-slate-200">
+        <div className="flex gap-1.5 shrink-0 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200">
           <button
             type="button"
             onClick={() => setStatusFilter('ALL')}
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${statusFilter === 'ALL' ? 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${statusFilter === 'ALL' ? 'bg-(--admin-navy) text-white shadow-md scale-100' : 'bg-transparent text-slate-600 hover:bg-slate-50 hover:text-(--admin-navy) scale-95 hover:scale-100'}`}
           >
-            All
+            <Users weight={statusFilter === 'ALL' ? 'fill' : 'bold'} size={18} />
+            All <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{donors.length}</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('ACTIVE')}
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${statusFilter === 'ACTIVE' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${statusFilter === 'ACTIVE' ? 'bg-emerald-600 text-white shadow-md scale-100' : 'bg-transparent text-slate-600 hover:bg-slate-50 hover:text-emerald-600 scale-95 hover:scale-100'}`}
           >
-            Active
+            <UserFocus weight={statusFilter === 'ACTIVE' ? 'fill' : 'bold'} size={18} />
+            Active <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'ACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{activeCount}</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('INACTIVE')}
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${statusFilter === 'INACTIVE' ? 'bg-white text-red-600 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${statusFilter === 'INACTIVE' ? 'bg-rose-600 text-white shadow-md scale-100' : 'bg-transparent text-slate-600 hover:bg-slate-50 hover:text-rose-600 scale-95 hover:scale-100'}`}
           >
-            Inactive
+            <UserMinus weight={statusFilter === 'INACTIVE' ? 'fill' : 'bold'} size={18} />
+            Inactive <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${statusFilter === 'INACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{inactiveCount}</span>
           </button>
         </div>
       </div>

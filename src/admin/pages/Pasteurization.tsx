@@ -68,7 +68,7 @@ export default function Pasteurization() {
             volume_ml,
             donors ( applicants ( first_name, last_name ) )
           `)
-          .in('status', ['PASSED', 'COMPLETE']); // Passed from laboratory or bypassed directly
+          .eq('status', 'PASSED'); // Passed from laboratory
 
         if (!collError && collData) {
           setPassedCollections(collData);
@@ -181,7 +181,7 @@ export default function Pasteurization() {
   const handleQuickPass = async (batch: BatchRecord) => {
     if (batch.status === 'PASSED') return;
     if (!confirm(`Mark batch ${batch.batch_id} as PASSED and add to inventory?`)) return;
-    
+
     setIsSubmitting(true);
     try {
       const { data: updatedBatch, error } = await supabase
@@ -213,7 +213,7 @@ export default function Pasteurization() {
       } else {
         alert('Batch passed and successfully added to Inventory!');
       }
-      
+
       setBatches(prev => prev.map(b => b.id === batch.id ? updatedBatch : b));
     } catch (err) {
       console.error('Error quick passing batch:', err);
@@ -253,71 +253,71 @@ export default function Pasteurization() {
 
       <div className="admin-table-wrap">
         <div className="admin-table-scroll">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Batch ID</th>
-              <th>Source</th>
-              <th>Volume</th>
-              <th>Date</th>
-              <th>Temperature</th>
-              <th>Duration</th>
-              <th>Status</th>
-              {canEdit && <th>Action</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr className="admin-table-empty-row">
-                <td colSpan={6}>Loading batches...</td>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Batch ID</th>
+                <th>Source</th>
+                <th>Volume</th>
+                <th>Date</th>
+                <th>Temperature</th>
+                <th>Duration</th>
+                <th>Status</th>
+                {canEdit && <th>Action</th>}
               </tr>
-            ) : batches.length === 0 ? (
-              <tr className="admin-table-empty-row">
-                <td colSpan={6}>No batches yet.</td>
-              </tr>
-            ) : (
-              batches.map(b => (
-                <tr key={b.id}>
-                  <td>{b.batch_id}</td>
-                  <td>{b.collection_ids ? `${b.collection_ids.length} Collections` : (b.collection_id ? b.collection_id.substring(0, 8) : 'N/A')}</td>
-                  <td>{b.total_volume_ml ? `${b.total_volume_ml} mL` : 'Unknown'}</td>
-                  <td>{new Date(b.created_at).toLocaleDateString()}</td>
-                  <td>{b.temperature_c != null ? `${b.temperature_c}°C` : '—'}</td>
-                  <td>{b.duration_minutes != null ? `${b.duration_minutes} min` : '—'}</td>
-                  <td>
-                    <StatusPill status={b.status} />
-                  </td>
-                  {canEdit && (
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr className="admin-table-empty-row">
+                  <td colSpan={6}>Loading batches...</td>
+                </tr>
+              ) : batches.length === 0 ? (
+                <tr className="admin-table-empty-row">
+                  <td colSpan={6}>No batches yet.</td>
+                </tr>
+              ) : (
+                batches.map(b => (
+                  <tr key={b.id}>
+                    <td>{b.batch_id}</td>
+                    <td>{b.collection_ids ? `${b.collection_ids.length} Collections` : (b.collection_id ? b.collection_id.substring(0, 8) : 'N/A')}</td>
+                    <td>{b.total_volume_ml ? `${b.total_volume_ml} mL` : 'Unknown'}</td>
+                    <td>{new Date(b.created_at).toLocaleDateString()}</td>
+                    <td>{b.temperature_c != null ? `${b.temperature_c}°C` : '—'}</td>
+                    <td>{b.duration_minutes != null ? `${b.duration_minutes} min` : '—'}</td>
                     <td>
-                      <div className="flex items-center gap-3">
-                        {b.status !== 'PASSED' && b.status !== 'FAILED' && (
+                      <StatusPill status={b.status} />
+                    </td>
+                    {canEdit && (
+                      <td>
+                        <div className="flex items-center gap-3">
+                          {b.status !== 'PASSED' && b.status !== 'FAILED' && (
+                            <button
+                              type="button"
+                              className="admin-edit-btn text-emerald-600 hover:text-emerald-700"
+                              aria-label={`Pass batch ${b.batch_id}`}
+                              title="Mark as Passed"
+                              onClick={() => handleQuickPass(b)}
+                            >
+                              <CheckCircle size={20} weight="fill" />
+                            </button>
+                          )}
                           <button
                             type="button"
-                            className="admin-edit-btn text-emerald-600 hover:text-emerald-700"
-                            aria-label={`Pass batch ${b.batch_id}`}
-                            title="Mark as Passed"
-                            onClick={() => handleQuickPass(b)}
+                            className="admin-edit-btn"
+                            aria-label={`Update batch ${b.batch_id}`}
+                            title="Update batch"
+                            onClick={() => openUpdateModal(b)}
                           >
-                            <CheckCircle size={20} weight="fill" />
+                            <PencilSimple size={20} />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          className="admin-edit-btn"
-                          aria-label={`Update batch ${b.batch_id}`}
-                          title="Update batch"
-                          onClick={() => openUpdateModal(b)}
-                        >
-                          <PencilSimple size={20} />
-                        </button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -334,7 +334,7 @@ export default function Pasteurization() {
                 <X size={20} weight="bold" />
               </button>
             </div>
-            
+
             <form onSubmit={handleCreateSubmit} className="admin-modal-body space-y-4">
               <div className="space-y-1.5">
                 <label htmlFor="batch_id" className="text-sm font-medium text-slate-700">Batch ID</label>
@@ -355,23 +355,21 @@ export default function Pasteurization() {
                   {passedCollections.map(c => {
                     const isSelected = createData.collection_ids.includes(c.id);
                     return (
-                      <label 
-                        key={c.id} 
-                        className={`flex items-center gap-3 cursor-pointer p-2.5 rounded-md border transition-all ${
-                          isSelected ? 'bg-white border-[#0d5780] shadow-sm' : 'bg-white border-transparent hover:border-slate-300'
-                        }`}
+                      <label
+                        key={c.id}
+                        className={`flex items-center gap-3 cursor-pointer p-2.5 rounded-md border transition-all ${isSelected ? 'bg-white border-[#0d5780] shadow-sm' : 'bg-white border-transparent hover:border-slate-300'
+                          }`}
                       >
-                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0 ${
-                          isSelected ? 'bg-[#0d5780] border-[#0d5780]' : 'bg-slate-50 border-slate-300'
-                        }`}>
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0 ${isSelected ? 'bg-[#0d5780] border-[#0d5780]' : 'bg-slate-50 border-slate-300'
+                          }`}>
                           {isSelected && (
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                           )}
                         </div>
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           className="hidden"
                           checked={isSelected}
                           onChange={(e) => {
@@ -472,7 +470,7 @@ export default function Pasteurization() {
                 <X size={20} weight="bold" />
               </button>
             </div>
-            
+
             <form onSubmit={handleUpdateSubmit} className="admin-modal-body space-y-4">
               <div className="space-y-1.5">
                 <label htmlFor="temp" className="text-sm font-medium text-slate-700">Temperature (°C)</label>
