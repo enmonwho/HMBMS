@@ -23,6 +23,9 @@ export default function Beneficiaries() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ status: '' });
+
   const [formData, setFormData] = useState({
     patient_name: '',
     parent_name: '',
@@ -219,10 +222,93 @@ export default function Beneficiaries() {
                   <FileText size={18} /> Parent/Guardian Consent Form
                 </a>
               </p>
+
+              <div className="mt-8 flex gap-3">
+                <button
+                  onClick={() => {
+                    setEditForm({ status: selected.status });
+                    setIsEditModalOpen(true);
+                  }}
+                  className="admin-pill-action-btn w-full py-3 rounded-lg font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+                >
+                  Edit Status
+                </button>
+              </div>
             </div>
           </aside>
         )}
       </div>
+
+      {/* Edit Status Modal */}
+      {isEditModalOpen && selected && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Edit Status for {selected.patient_name}</h2>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="admin-modal-close"
+              >
+                <X size={20} weight="bold" />
+              </button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setIsSubmitting(true);
+              try {
+                const { error } = await supabase
+                  .from('beneficiaries')
+                  .update({ status: editForm.status })
+                  .eq('id', selected.id);
+                
+                if (error) throw error;
+
+                setBeneficiaries(prev => prev.map(b => 
+                  b.id === selected.id ? { ...b, status: editForm.status } : b
+                ));
+
+                setIsEditModalOpen(false);
+                alert('Status updated successfully!');
+              } catch (err) {
+                console.error('Error updating status:', err);
+                alert('Failed to update status. Please try again.');
+              } finally {
+                setIsSubmitting(false);
+              }
+            }} className="admin-modal-body space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Status</label>
+                <select 
+                  className="admin-modal-input"
+                  value={editForm.status}
+                  onChange={e => setEditForm({ status: e.target.value })}
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="PENDING">PENDING</option>
+                  <option value="INACTIVE">INACTIVE</option>
+                </select>
+              </div>
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="admin-btn-cancel"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-btn-save"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="admin-modal-overlay">

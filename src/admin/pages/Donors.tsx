@@ -32,6 +32,8 @@ export default function Donors() {
   const [selectedDonor, setSelectedDonor] = useState<DonorRecord | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+  const [collectionForm, setCollectionForm] = useState({ volume_ml: '' });
   const [editForm, setEditForm] = useState({
     status: '',
     contact_number: '',
@@ -226,7 +228,10 @@ export default function Donors() {
               </div>
 
               <div className="mt-2 flex gap-3">
-                <button className="admin-pill-action-btn w-full py-3 rounded-lg font-semibold bg-(--admin-navy) text-white hover:bg-(--admin-navy-dark) transition-colors shadow-sm">
+                <button 
+                  onClick={() => setIsCollectionModalOpen(true)}
+                  className="admin-pill-action-btn w-full py-3 rounded-lg font-semibold bg-(--admin-navy) text-white hover:bg-(--admin-navy-dark) transition-colors shadow-sm"
+                >
                   Start Collection
                 </button>
                 <button 
@@ -245,6 +250,95 @@ export default function Donors() {
               </div>
             </div>
           </aside>
+        )}
+
+        {/* Start Collection Modal */}
+        {isCollectionModalOpen && selectedDonor && (
+          <div className="admin-modal-overlay">
+            <div className="admin-modal-content">
+              <div className="admin-modal-header">
+                <h2 className="admin-modal-title">Start Milk Collection</h2>
+                <button 
+                  onClick={() => {
+                    setIsCollectionModalOpen(false);
+                    setCollectionForm({ volume_ml: '' });
+                  }}
+                  className="admin-modal-close"
+                >
+                  <X size={20} weight="bold" />
+                </button>
+              </div>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setIsSubmitting(true);
+                try {
+                  const newBarcode = `BAR-${Math.random().toString(36).substring(2, 6)}`;
+                  const { error } = await supabase.from('milk_collections').insert([{
+                    donor_id: selectedDonor.id,
+                    volume_ml: parseInt(collectionForm.volume_ml, 10),
+                    status: 'PENDING LABORATORY',
+                    barcode: newBarcode,
+                    collection_date: new Date().toISOString()
+                  }]);
+                  
+                  if (error) throw error;
+
+                  await fetchDonors();
+                  
+                  // Update the currently selected donor so the UI reflects the new volume immediately
+                  setSelectedDonor(prev => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      milk_collections: [...(prev.milk_collections || []), { volume_ml: parseInt(collectionForm.volume_ml, 10) }]
+                    };
+                  });
+
+                  setIsCollectionModalOpen(false);
+                  setCollectionForm({ volume_ml: '' });
+                  alert('Milk collection successfully recorded!');
+                } catch (err) {
+                  console.error('Error starting collection:', err);
+                  alert('Failed to start collection. Please try again.');
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }} className="admin-modal-body space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Volume (in mL)</label>
+                  <input 
+                    type="number"
+                    min="1"
+                    required
+                    className="admin-modal-input"
+                    value={collectionForm.volume_ml}
+                    onChange={e => setCollectionForm({ volume_ml: e.target.value })}
+                    placeholder="e.g. 150"
+                  />
+                </div>
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCollectionModalOpen(false);
+                      setCollectionForm({ volume_ml: '' });
+                    }}
+                    className="admin-btn-cancel"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="admin-btn-save"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Saving...' : 'Record Collection'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
 
         {/* Edit Modal */}

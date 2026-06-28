@@ -81,6 +81,7 @@ export default function Applicants() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingSMS, setIsSendingSMS] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -151,6 +152,46 @@ export default function Applicants() {
     } catch (err) {
       console.error('Error updating status:', err);
       alert('Failed to update applicant status.');
+    }
+  };
+
+  const handleSendReminder = async () => {
+    if (!selectedApplicant) return;
+    
+    const prefDate = selectedApplicant.donation_preferences?.preferredDateTime as string;
+    if (!prefDate) {
+      alert("No preferred date and time selected by this applicant.");
+      return;
+    }
+    if (!selectedApplicant.contact_number) {
+      alert("Applicant does not have a contact number.");
+      return;
+    }
+
+    const message = `Hello ${selectedApplicant.first_name}, this is a reminder from HMBMS regarding your donation drop-off scheduled for ${prefDate}. Thank you!`;
+
+    setIsSendingSMS(true);
+    try {
+      const res = await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phoneNumber: selectedApplicant.contact_number,
+          message
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send SMS');
+      
+      alert('SMS Reminder sent successfully!');
+    } catch (err) {
+      console.error('SMS Error:', err);
+      alert('Failed to send SMS. Please ensure your Textbee API keys are configured correctly in the environment variables.');
+    } finally {
+      setIsSendingSMS(false);
     }
   };
 
@@ -431,6 +472,17 @@ export default function Applicants() {
                     className="w-full py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
                   >
                     Revert to Pending
+                  </button>
+                )}
+
+                {selectedApplicant.donation_preferences?.preferredDateTime && selectedApplicant.contact_number && (
+                  <button
+                    onClick={handleSendReminder}
+                    disabled={isSendingSMS}
+                    className="w-full mt-2 py-2.5 flex items-center justify-center gap-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    <Phone size={18} weight="bold" />
+                    {isSendingSMS ? 'Sending SMS...' : 'Send SMS Reminder'}
                   </button>
                 )}
               </div>

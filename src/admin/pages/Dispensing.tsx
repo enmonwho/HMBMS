@@ -8,9 +8,8 @@ interface DispensingRecord {
   id: string;
   beneficiary_id: string;
   volume_dispensed_ml: number;
-  status: string;
   created_at: string;
-  dispensed_at: string;
+  dispensed_date: string;
   beneficiaries?: {
     patient_name: string;
   };
@@ -26,7 +25,7 @@ export default function Dispensing() {
   const [formData, setFormData] = useState({
     beneficiary_id: '',
     volume_dispensed_ml: '',
-    dispensed_at: new Date().toISOString().split('T')[0],
+    dispensed_date: new Date().toISOString().split('T')[0],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,7 +54,7 @@ export default function Dispensing() {
       const { data: benData } = await supabase
         .from('beneficiaries')
         .select('id, patient_name, hospital_id')
-        .eq('status', 'ACTIVE');
+        .in('status', ['ACTIVE', 'PENDING']);
       if (benData) {
         setActiveBeneficiaries(benData);
       }
@@ -88,8 +87,7 @@ export default function Dispensing() {
         .insert([{
           beneficiary_id: formData.beneficiary_id,
           volume_dispensed_ml: parseInt(formData.volume_dispensed_ml, 10),
-          dispensed_at: formData.dispensed_at,
-          status: 'RELEASED'
+          dispensed_date: formData.dispensed_date
         }])
         .select(`
           *,
@@ -103,7 +101,7 @@ export default function Dispensing() {
       setFormData({
         beneficiary_id: '',
         volume_dispensed_ml: '',
-        dispensed_at: new Date().toISOString().split('T')[0],
+        dispensed_date: new Date().toISOString().split('T')[0],
       });
     } catch (err) {
       console.error('Error dispensing milk:', err);
@@ -163,11 +161,11 @@ export default function Dispensing() {
             {!loading && filtered.map(d => (
               <tr key={d.id}>
                 <td>{d.id.substring(0, 8)}</td>
-                <td>{new Date(d.dispensed_at || d.created_at).toLocaleDateString()}</td>
+                <td>{new Date(d.dispensed_date || d.created_at).toLocaleDateString()}</td>
                 <td className="admin-table-name">{d.beneficiaries?.patient_name || d.beneficiary_id}</td>
                 <td>{d.volume_dispensed_ml} ml</td>
                 <td>
-                  <StatusPill status={d.status || 'RELEASED'} />
+                  <StatusPill status={'RELEASED'} />
                 </td>
               </tr>
             ))}
@@ -231,8 +229,8 @@ export default function Dispensing() {
                   required
                   type="date"
                   className="admin-modal-input"
-                  value={formData.dispensed_at}
-                  onChange={e => setFormData({ ...formData, dispensed_at: e.target.value })}
+                  value={formData.dispensed_date}
+                  onChange={e => setFormData({ ...formData, dispensed_date: e.target.value })}
                 />
               </div>
 
