@@ -48,7 +48,7 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/admin/login');
+    navigate('/login');
   };
 
   // Filter groups and children based on user role
@@ -77,7 +77,7 @@ export default function AdminLayout() {
           <aside className="admin-sidebar" aria-label="Admin navigation">
             <nav className="admin-nav">
             <NavLink
-              to="/admin/dashboard"
+              to="/dashboard"
               className={({ isActive }) =>
                 `admin-nav-toplink${isActive ? ' active' : ''}`
               }
@@ -126,7 +126,7 @@ export default function AdminLayout() {
 
             {(!role || ['Administrator', 'Coordinator', 'Medical Technologist'].includes(role)) && (
               <NavLink
-              to="/admin/reports"
+              to="/reports"
               className={({ isActive }) =>
                 `admin-nav-toplink${isActive ? ' active' : ''}`
               }

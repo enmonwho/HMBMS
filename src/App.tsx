@@ -28,66 +28,85 @@ import ProtectedRoute from './admin/components/ProtectedRoute';
 
 import { AuthProvider } from './shared/lib/AuthContext';
 
+import { Navigate } from 'react-router-dom';
+
 function App() {
+  const hostname = window.location.hostname;
+  // Support admin.hmbms.com, admin.localhost, and Vercel preview domains starting with admin-
+  const isAdminDomain = hostname.startsWith('admin.') || hostname.startsWith('admin-');
+
+  if (isAdminDomain) {
+    return (
+      <AuthProvider>
+        <Routes>
+          {/* Admin Panel */}
+          <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<AdminLayout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
+                <Route path="donor-management/applicants" element={<Applicants />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife', 'Medical Technologist']} />}>
+                <Route path="donor-management/donors" element={<Donors />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife']} />}>
+                <Route path="donor-management/collections" element={<Collections />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
+                <Route path="processing/laboratory" element={<Laboratory />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist']} />}>
+                <Route path="processing/pasteurization" element={<Pasteurization />} />
+                <Route path="processing/inventory" element={<Inventory />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife']} />}>
+                <Route path="beneficiaries/list" element={<Beneficiaries />} />
+                <Route path="beneficiaries/dispensing" element={<Dispensing />} />
+              </Route>
+              
+              <Route path="support/hotline" element={<Hotline />} />
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Medical Technologist']} />}>
+                <Route path="reports" element={<Reports />} />
+              </Route>
+              
+              <Route element={<ProtectedRoute allowedRoles={['Administrator']} />}>
+                <Route path="administration/user-management" element={<UserManagement />} />
+              </Route>
+            </Route>
+          </Route>
+          {/* Fallback for admin domain */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AuthProvider>
+    );
+  }
+
+  // Public Domain
   return (
     <AuthProvider>
       <Routes>
-      {/* Public site */}
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/donate" element={<DonateForm />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/who" element={<WhoWeHelp />} />
-        <Route path="/milky-way" element={<MilkyWay />} />
-        <Route path="/supsup-todo" element={<SupsupTodo />} />
-        <Route path="/moms-act" element={<MomsAct />} />
-        <Route path="/procedure" element={<Procedure />} />
-        <Route path="/safety" element={<Safety />} />
-      </Route>
-
-      {/* Admin Panel */}
-      <Route path="/admin/login" element={<Login />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
-            <Route path="donor-management/applicants" element={<Applicants />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife', 'Medical Technologist']} />}>
-            <Route path="donor-management/donors" element={<Donors />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife']} />}>
-            <Route path="donor-management/collections" element={<Collections />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist']} />}>
-            <Route path="processing/laboratory" element={<Laboratory />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist']} />}>
-            <Route path="processing/pasteurization" element={<Pasteurization />} />
-            <Route path="processing/inventory" element={<Inventory />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife']} />}>
-            <Route path="beneficiaries/list" element={<Beneficiaries />} />
-            <Route path="beneficiaries/dispensing" element={<Dispensing />} />
-          </Route>
-          
-          <Route path="support/hotline" element={<Hotline />} />
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator', 'Coordinator', 'Medical Technologist']} />}>
-            <Route path="reports" element={<Reports />} />
-          </Route>
-          
-          <Route element={<ProtectedRoute allowedRoles={['Administrator']} />}>
-            <Route path="administration/user-management" element={<UserManagement />} />
-          </Route>
+        {/* Public site */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/donate" element={<DonateForm />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/who" element={<WhoWeHelp />} />
+          <Route path="/milky-way" element={<MilkyWay />} />
+          <Route path="/supsup-todo" element={<SupsupTodo />} />
+          <Route path="/moms-act" element={<MomsAct />} />
+          <Route path="/procedure" element={<Procedure />} />
+          <Route path="/safety" element={<Safety />} />
         </Route>
-      </Route>
+        {/* Fallback for public domain */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
   );

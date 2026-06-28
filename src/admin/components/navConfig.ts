@@ -28,47 +28,47 @@ const ALL_ROLES = ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', '
 export const adminNavGroups: AdminNavGroup[] = [
   {
     label: 'DONOR MANAGEMENT',
-    basePath: '/admin/donor-management',
+    basePath: '/donor-management',
     allowedRoles: ALL_ROLES,
     children: [
-      { label: 'APPLICANTS', path: '/admin/donor-management/applicants', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist'] }, // No Attendant
-      { label: 'DONORS', path: '/admin/donor-management/donors', allowedRoles: ALL_ROLES },
-      { label: 'COLLECTIONS', path: '/admin/donor-management/collections', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] }, // No Med Tech
+      { label: 'APPLICANTS', path: '/donor-management/applicants', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist'] }, // No Attendant
+      { label: 'DONORS', path: '/donor-management/donors', allowedRoles: ALL_ROLES },
+      { label: 'COLLECTIONS', path: '/donor-management/collections', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] }, // No Med Tech
     ],
   },
   {
     label: 'PROCESSING',
-    basePath: '/admin/processing',
+    basePath: '/processing',
     allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife', 'Medical Technologist'], // Midwife has view to lab, so can see the group
     children: [
-      { label: 'LABORATORY', path: '/admin/processing/laboratory', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist'] }, // No Attendant
-      { label: 'PASTEURIZATION', path: '/admin/processing/pasteurization', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist'] }, // No Midwife
-      { label: 'INVENTORY', path: '/admin/processing/inventory', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist'] }, // No Midwife
+      { label: 'LABORATORY', path: '/processing/laboratory', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Midwife', 'Medical Technologist'] }, // No Attendant
+      { label: 'PASTEURIZATION', path: '/processing/pasteurization', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist'] }, // No Midwife
+      { label: 'INVENTORY', path: '/processing/inventory', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Medical Technologist'] }, // No Midwife
     ],
   },
   {
     label: 'BENEFICIARIES',
-    basePath: '/admin/beneficiaries',
+    basePath: '/beneficiaries',
     allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'], // No Med Tech
     children: [
-      { label: 'BENEFICIARIES', path: '/admin/beneficiaries/list', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] },
-      { label: 'DISPENSING', path: '/admin/beneficiaries/dispensing', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] },
+      { label: 'BENEFICIARIES', path: '/beneficiaries/list', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] },
+      { label: 'DISPENSING', path: '/beneficiaries/dispensing', allowedRoles: ['Administrator', 'Coordinator', 'Nurse', 'Nurse Attendant', 'Midwife'] },
     ],
   },
   {
     label: 'SUPPORT',
-    basePath: '/admin/support',
+    basePath: '/support',
     allowedRoles: ALL_ROLES,
     children: [
-      { label: 'HOTLINE', path: '/admin/support/hotline', allowedRoles: ALL_ROLES },
+      { label: 'HOTLINE', path: '/support/hotline', allowedRoles: ALL_ROLES },
     ],
   },
   {
     label: 'ADMINISTRATION',
-    basePath: '/admin/administration',
+    basePath: '/administration',
     allowedRoles: ['Administrator'],
     children: [
-      { label: 'USER MANAGEMENT', path: '/admin/administration/user-management', allowedRoles: ['Administrator'] },
+      { label: 'USER MANAGEMENT', path: '/administration/user-management', allowedRoles: ['Administrator'] },
     ],
   },
 ];

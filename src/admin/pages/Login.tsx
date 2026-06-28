@@ -16,7 +16,7 @@ export default function Login() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/admin/dashboard');
+        navigate('/dashboard');
       }
     });
   }, [navigate]);
@@ -43,7 +43,7 @@ export default function Login() {
         return;
       }
 
-      const from = location.state?.from?.pathname || '/admin/dashboard';
+      const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
