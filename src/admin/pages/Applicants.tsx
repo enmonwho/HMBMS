@@ -490,7 +490,7 @@ export default function Applicants() {
                   </button>
                 )}
 
-                {selectedApplicant.donation_preferences?.preferredDateTime && selectedApplicant.contact_number && (
+                {!!selectedApplicant.donation_preferences?.preferredDateTime && !!selectedApplicant.contact_number && (
                   <button
                     onClick={handleSendReminder}
                     disabled={isSendingSMS}
