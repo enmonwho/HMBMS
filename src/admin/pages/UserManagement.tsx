@@ -30,6 +30,14 @@ export default function UserManagement() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [editFormData, setEditFormData] = useState({
+    full_name: '',
+    role: 'Nurse',
+    status: 'ACTIVE',
+  });
+
   useEffect(() => {
     async function fetchUsers() {
       try {
@@ -106,6 +114,48 @@ export default function UserManagement() {
     }
   };
 
+  const handleEditClick = (u: SystemUserRecord) => {
+    setSelectedUserId(u.id);
+    setEditFormData({
+      full_name: u.full_name || '',
+      role: u.role || 'Nurse',
+      status: u.status || 'ACTIVE',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedUserId('');
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('system_users')
+        .update({
+          full_name: editFormData.full_name,
+          role: editFormData.role,
+          status: editFormData.status,
+        })
+        .eq('id', selectedUserId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(u => (u.id === selectedUserId ? data : u)));
+      handleCloseEditModal();
+    } catch (err) {
+      console.error('Error updating user:', err);
+      alert('Failed to update user. Check console for details.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <PageHeader title="System Users" />
@@ -165,6 +215,7 @@ export default function UserManagement() {
                       type="button"
                       className="admin-edit-btn"
                       aria-label={`Manage ${u.full_name}`}
+                      onClick={() => handleEditClick(u)}
                     >
                       <Gear size={16} className="inline-block mr-1" /> Manage
                     </button>
@@ -277,6 +328,87 @@ export default function UserManagement() {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Saving...' : 'Save User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {isEditModalOpen && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content">
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Edit System User</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={handleCloseEditModal}
+              >
+                <X size={20} weight="bold" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="admin-modal-body space-y-4">
+              <div className="space-y-1.5">
+                <label htmlFor="edit_full_name" className="text-sm font-medium text-slate-700">Full Name</label>
+                <input
+                  id="edit_full_name"
+                  required
+                  type="text"
+                  className="admin-modal-input"
+                  placeholder="e.g. Jane Doe"
+                  value={editFormData.full_name}
+                  onChange={e => setEditFormData({ ...editFormData, full_name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="edit_role" className="text-sm font-medium text-slate-700">Role</label>
+                <select
+                  id="edit_role"
+                  required
+                  className="admin-modal-input"
+                  value={editFormData.role}
+                  onChange={e => setEditFormData({ ...editFormData, role: e.target.value })}
+                >
+                  <option value="Administrator">Administrator</option>
+                  <option value="Coordinator">Coordinator</option>
+                  <option value="Nurse">Nurse</option>
+                  <option value="Nurse Attendant">Nurse Attendant</option>
+                  <option value="Medical Technologist">Medical Technologist</option>
+                  <option value="Midwife">Midwife</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="edit_status" className="text-sm font-medium text-slate-700">Status</label>
+                <select
+                  id="edit_status"
+                  required
+                  className="admin-modal-input"
+                  value={editFormData.status}
+                  onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="INACTIVE">INACTIVE</option>
+                </select>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-3" style={{ marginTop: '2.5rem' }}>
+                <button
+                  type="button"
+                  className="admin-btn-cancel"
+                  onClick={handleCloseEditModal}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-btn-save"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Update User'}
                 </button>
               </div>
             </form>
