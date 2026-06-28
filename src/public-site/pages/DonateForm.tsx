@@ -132,7 +132,8 @@ const donationQuestions: { key: keyof Omit<DonatingMilk, 'preferredDateTime'>; q
       'Freshly expressed and refrigerated',
       'Frozen in breast milk storage bags',
       'Frozen in sterile bottle or containers',
-      'Others'
+      'Others',
+      'Not Applicable; I will do the procedure at the hospital'
     ]
   },
   {
@@ -152,7 +153,8 @@ const donationQuestions: { key: keyof Omit<DonatingMilk, 'preferredDateTime'>; q
     options: [
       'Refrigerator-freezer combination unit',
       'Chest freezer or dedicated deep freezer',
-      'Not applicable; I am donating refrigerated breast milk only'
+      'Not applicable; I am donating refrigerated breast milk only',
+      'Not Applicable; I will do the procedure at the hospital'
     ]
   }
 ]
