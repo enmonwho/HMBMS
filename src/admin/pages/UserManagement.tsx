@@ -86,34 +86,34 @@ export default function UserManagement() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (authError) throw authError;
-
-      // Create system user record
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([{
-          user_id: authData.user?.id || formData.user_id, // Link to auth user if possible
+      // Call server-side API to create user (uses service role key)
+      const res = await fetch('/api/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          user_id: formData.user_id,
           full_name: formData.full_name,
           role: formData.role,
-          email: formData.email,
-          status: 'ACTIVE'
-        }])
-        .select()
-        .single();
+        }),
+      });
 
-      if (error) throw error;
-      
-      setUsers(prev => [...prev, data]);
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to create user');
+      }
+
+      if (result.user) {
+        setUsers(prev => [...prev, result.user]);
+      }
       handleCloseModal();
-    } catch (err) {
+      alert('User created successfully!');
+    } catch (err: unknown) {
       console.error('Error adding user:', err);
-      alert('Failed to add user. Check console for details.');
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Failed to add user: ${message}`);
     } finally {
       setIsSubmitting(false);
     }
