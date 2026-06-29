@@ -132,7 +132,30 @@ export default function Pasteurization() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // 1. Update the batch
+      const originalBatch = batches.find(b => b.id === updateData.id);
+      const isNewlyPassed = originalBatch?.status !== 'PASSED' && updateData.status === 'PASSED';
+      const isUnpassed = originalBatch?.status === 'PASSED' && updateData.status !== 'PASSED';
+
+      // 1. If unpassing, attempt to delete from inventory FIRST
+      if (isUnpassed) {
+        const { error: invError } = await supabase
+          .from('inventory')
+          .delete()
+          .eq('barcode', updateData.batch_id);
+          
+        if (invError) {
+          console.error('Inventory deletion error:', invError);
+          if (invError.code === '23503') {
+            alert('Cannot change status: This batch has already been dispensed.');
+          } else {
+            alert('Cannot change status: Failed to remove from inventory.');
+          }
+          setIsSubmitting(false);
+          return; // Abort update to prevent inconsistent state
+        }
+      }
+
+      // 2. Update the batch
       const { data: updatedBatch, error } = await supabase
         .from('batches')
         .update({
@@ -146,10 +169,7 @@ export default function Pasteurization() {
 
       if (error) throw error;
 
-      // 2. Auto-add to inventory ONLY IF status is changing to PASSED
-      const originalBatch = batches.find(b => b.id === updateData.id);
-      const isNewlyPassed = originalBatch?.status !== 'PASSED' && updateData.status === 'PASSED';
-
+      // 3. Auto-add to inventory ONLY IF status is changing to PASSED
       if (isNewlyPassed) {
         const vol = updateData.total_volume_ml || 0;
 
@@ -177,6 +197,8 @@ export default function Pasteurization() {
         } else {
           alert('Batch passed and successfully added to Inventory!');
         }
+      } else if (isUnpassed) {
+        alert('Batch status changed from Passed, successfully removed from Inventory!');
       }
 
       // Update collections status based on the new batch status

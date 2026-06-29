@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data } = await supabase
           .from('profiles')
           .select('role')
-          .eq('user_id', session.user.id)
+          .eq('email', session.user.email)
           .single();
         
         if (data) {
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data } = await supabase
           .from('profiles')
           .select('role')
-          .eq('user_id', session.user.id)
+          .eq('email', session.user.email)
           .single();
         if (data) {
           setRole(data.role);
