@@ -64,11 +64,22 @@ export default function Beneficiaries() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return beneficiaries;
-    return beneficiaries.filter(b =>
-      (b.patient_name || '').toLowerCase().includes(q) ||
-      (b.parent_name || '').toLowerCase().includes(q)
-    );
+    
+    let result = beneficiaries;
+    if (q) {
+      result = beneficiaries.filter(b =>
+        (b.patient_name || '').toLowerCase().includes(q) ||
+        (b.parent_name || '').toLowerCase().includes(q)
+      );
+    }
+
+    return [...result].sort((a, b) => {
+      const aIsInactive = a.status === 'INACTIVE';
+      const bIsInactive = b.status === 'INACTIVE';
+      if (aIsInactive && !bIsInactive) return 1;
+      if (!aIsInactive && bIsInactive) return -1;
+      return 0;
+    });
   }, [beneficiaries, search]);
 
   const selected = beneficiaries.find(b => b.id === selectedId);
