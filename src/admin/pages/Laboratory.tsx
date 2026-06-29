@@ -14,6 +14,10 @@ interface LabTestRecord {
 }
 
 export default function Laboratory() {
+  useEffect(() => {
+    document.title = "MHMB System - Laboratory";
+  }, []);
+
   const [tests, setTests] = useState<LabTestRecord[]>([]);
   const [pendingCollections, setPendingCollections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

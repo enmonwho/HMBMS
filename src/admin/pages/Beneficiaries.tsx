@@ -18,6 +18,10 @@ interface BeneficiaryRecord {
 }
 
 export default function Beneficiaries() {
+  useEffect(() => {
+    document.title = "MHMB System - Beneficiaries";
+  }, []);
+
   const [beneficiaries, setBeneficiaries] = useState<BeneficiaryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

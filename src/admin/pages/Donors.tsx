@@ -27,6 +27,10 @@ interface DonorRecord {
 }
 
 export default function Donors() {
+  useEffect(() => {
+    document.title = "MHMB System - Donors";
+  }, []);
+
   const [donors, setDonors] = useState<DonorRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

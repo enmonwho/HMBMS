@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
 function MomsAct() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - Moms Act";
+  }, []);
+
   return (
     <div className="momsact-page-wrapper">
 

@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
 function SupsupTodo() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - Supsup Todo";
+  }, []);
+
   return (
     <div className="supsup-page-wrapper">
 

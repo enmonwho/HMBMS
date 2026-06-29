@@ -22,6 +22,9 @@ function useAnimatedCounter(target: number, duration = 1800, trigger: boolean) {
 }
 
 export default function HomePage() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank";
+  }, []);
   const [counterVisible, setCounterVisible] = useState(false)
   const totalRef = useRef<HTMLSpanElement>(null)
   const animatedTotal = useAnimatedCounter(785, 1800, counterVisible)

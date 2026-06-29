@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
 export default function Procedure() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - Procedure";
+  }, []);
+
   return (
     <div 
       className="donate-info-wrapper" 

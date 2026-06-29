@@ -18,6 +18,10 @@ interface BatchRecord {
 }
 
 export default function Pasteurization() {
+  useEffect(() => {
+    document.title = "MHMB System - Pasteurization";
+  }, []);
+
   const { role } = useAuth();
   const canEdit = role !== 'Nurse';
 

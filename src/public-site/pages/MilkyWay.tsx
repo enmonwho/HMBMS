@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
 function MilkyWay() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - Milky Way";
+  }, []);
+
   return (
     <div className="milky-page-wrapper">
 

@@ -5,6 +5,10 @@ import '../admin.css';
 import { supabase } from '../../shared/lib/supabase';
 
 export default function Login() {
+  useEffect(() => {
+    document.title = "MHMB System - login";
+  }, []);
+
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

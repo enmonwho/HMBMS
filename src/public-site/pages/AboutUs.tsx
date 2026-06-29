@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
 function AboutUs() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - About Us";
+  }, []);
+
   return (
     <div className="about-page-wrapper">
 

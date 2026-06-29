@@ -18,6 +18,10 @@ interface GeneratedReportRecord {
 }
 
 export default function Reports() {
+  useEffect(() => {
+    document.title = "MHMB System - Reports";
+  }, []);
+
   const [reportType, setReportType] = useState<ReportType | ''>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');

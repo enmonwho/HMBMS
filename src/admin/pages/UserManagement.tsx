@@ -16,6 +16,10 @@ interface SystemUserRecord {
 }
 
 export default function UserManagement() {
+  useEffect(() => {
+    document.title = "MHMB System - User Management";
+  }, []);
+
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<SystemUserRecord[]>([]);
   const [loading, setLoading] = useState(true);

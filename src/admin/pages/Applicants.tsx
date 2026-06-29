@@ -55,6 +55,7 @@ const QUESTION_MAP: Record<string, string> = {
 };
 
 const renderJson = (data: Record<string, unknown> | null | undefined) => {
+
   if (!data) return <span className="italic text-slate-400">None</span>;
   if (typeof data === 'string') return data;
   const entries = Object.entries(data).filter(([key, v]) => key && v !== null && v !== '');
@@ -75,6 +76,9 @@ const renderJson = (data: Record<string, unknown> | null | undefined) => {
 };
 
 export default function Applicants() {
+  useEffect(() => {
+    document.title = "MHMB System - Applicants";
+  }, []);
   const [applicants, setApplicants] = useState<ApplicantRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

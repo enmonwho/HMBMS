@@ -20,6 +20,10 @@ interface DispensingRecord {
 }
 
 export default function Dispensing() {
+  useEffect(() => {
+    document.title = "MHMB System - Dispensing";
+  }, []);
+
   const [records, setRecords] = useState<DispensingRecord[]>([]);
   const [activeBeneficiaries, setActiveBeneficiaries] = useState<any[]>([]);
   const [availableInventory, setAvailableInventory] = useState<any[]>([]);

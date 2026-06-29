@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
 export default function Safety() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - Safety";
+  }, []);
+
   return (
     <div
       className="donate-info-wrapper"

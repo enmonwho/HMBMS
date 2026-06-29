@@ -18,6 +18,10 @@ interface CollectionRecord {
 }
 
 export default function Collections() {
+  useEffect(() => {
+    document.title = "MHMB System - Collections";
+  }, []);
+
   const [collections, setCollections] = useState<CollectionRecord[]>([]);
   const [loading, setLoading] = useState(true);
 

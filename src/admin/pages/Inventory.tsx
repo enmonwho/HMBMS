@@ -25,6 +25,10 @@ interface ChartDataPoint {
 }
 
 export default function Inventory() {
+  useEffect(() => {
+    document.title = "MHMB System - Inventory";
+  }, []);
+
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);

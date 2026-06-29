@@ -6,6 +6,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 const COLORS = ['#10b981', '#f43f5e', '#f59e0b', '#0ea5e9'];
 
 export default function Dashboard() {
+  useEffect(() => {
+    document.title = "MHMB System - Dashboard";
+  }, []);
+
   const [stats, setStats] = useState({
     totalDonors: 0,
     inventory: 0,

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import {  useState, useCallback , useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabase'
 
@@ -161,6 +161,10 @@ const donationQuestions: { key: keyof Omit<DonatingMilk, 'preferredDateTime'>; q
 ]
 
 export default function DonateForm() {
+  useEffect(() => {
+    document.title = "Makati Human Milk Bank - Donate";
+  }, []);
+
   const navigate = useNavigate()
   const [form, setForm] = useState<FormState>(initialForm)
 
